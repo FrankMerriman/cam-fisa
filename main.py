@@ -7,7 +7,7 @@ print(camera_config)
 picam2.configure(camera_config)
 picam2.start()
 
-while true:
+while True:
     input("Press Enter to capture an image...")
     val = time.time()
     picam2.capture_file(f"{val}.jpg")
