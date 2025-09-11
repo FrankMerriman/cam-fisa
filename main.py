@@ -17,5 +17,5 @@ picam2.start()
 
 while True:
     input("Press Enter to capture an image...")
-    val = time.time()
-    picam2.capture_file(f"{val}.jpg")
+    # val = time.time()
+    picam2.capture_file(f"sample.jpg") # So image path is the same for remote viewing / debug. Don't need more than 1 image saved rn.
