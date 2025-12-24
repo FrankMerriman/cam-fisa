@@ -5,7 +5,7 @@ import os
 import mmap
 import numpy as np
 import cv2
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 from picamera2 import Picamera2
 from utils.writeToScreen import write_to_screen, rgb24_to_rgb565
 from utils.rpiInfo import get_cpu_temp, get_fps
@@ -18,6 +18,7 @@ class CameraScreen:
     FB_PATH = "/dev/fb1"
     FB_W, FB_H = 240, 320
     BUTTON_HEIGHT = 50
+    FONT = ImageFont.load_default()
 
     def __init__(self):
         self.picam2 = Picamera2()
