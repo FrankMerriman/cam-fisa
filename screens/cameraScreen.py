@@ -45,18 +45,7 @@ class CameraScreen:
         r, _, _ = select.select([self.touch_dev], [], [], 0)
         if r:
             for event in self.touch_dev.read():
-                if event.type == ecodes.EV_ABS:
-                    if event.code == ecodes.ABS_X:
-                        x_pos = event.value
-                    elif event.code == ecodes.ABS_Y:
-                        y_pos = event.value
-                    elif event.code == ecodes.ABS_PRESSURE:
-                        pressure = event.value
-                        if pressure > 0:
-                            if top_area[0] <= x_pos <= top_area[2] and top_area[1] <= y_pos <= top_area[3]:
-                                print("Top button tapped")
-                            elif bottom_area[0] <= x_pos <= bottom_area[2] and bottom_area[1] <= y_pos <= bottom_area[3]:
-                                print("Bottom button tapped")
+                print(event)
 
     def letterbox(self, frame):
         h, w = frame.shape[:2]
