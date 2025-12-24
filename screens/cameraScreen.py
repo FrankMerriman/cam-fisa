@@ -24,7 +24,7 @@ class CameraScreen:
         self.capture_config = self.picam2.create_still_configuration(main={"size": (2592, 1944)})
         self.video_config = self.picam2.create_video_configuration()
         self.fb = None
-        self.touch_dev = InputDevice('/dev/input/event0')
+        self.touch = InputDevice('/dev/input/event0')
     
     def start_camera(self):
         self.fb = open(self.FB_PATH, "r+b")
@@ -42,10 +42,9 @@ class CameraScreen:
         fb_frame, top_area, bottom_area = self.draw_buttons(fb_frame)
         fb_bytes = rgb24_to_rgb565(np.ascontiguousarray(fb_frame))
         write_to_screen(self.fb, fb_bytes)
-        r, _, _ = select.select([self.touch_dev], [], [], 0)
-        if r:
-            for event in self.touch_dev.read():
-                print(event)
+        x, y, pressure = self.read_touch()
+        if x:
+            print(f"Touch at ({x}, {y}) with pressure {pressure}")
 
     def letterbox(self, frame):
         h, w = frame.shape[:2]
@@ -68,6 +67,23 @@ class CameraScreen:
         draw.rectangle(bottom_button_area, fill=(255, 0, 0))
         draw.text((self.FB_W//2 + 5, self.FB_H - 45), "Bottom", fill=(255, 255, 255))
         return np.array(img), top_button_area, bottom_button_area
+    
+    def read_touch(self):
+        x = y = pressure = None
+        r, _, _ = select.select([self.touch], [], [], 0)
+        if r:
+            for event in self.touch.read():
+                if event.type == ecodes.EV_ABS:
+                    if event.code == ecodes.ABS_X:
+                        x = event.value
+                    elif event.code == ecodes.ABS_Y:
+                        y = event.value
+                    elif event.code == ecodes.ABS_PRESSURE:
+                        pressure = event.value
+                elif event.type == ecodes.EV_SYN:  # SYN_REPORT → end of this sample
+                    if x is not None and y is not None and pressure is not None:
+                        return x, y, pressure
+        return None, None, None
 
     # def draw_ui(self, frame):
     #     """Draws UI elements and returns the new frame"""
