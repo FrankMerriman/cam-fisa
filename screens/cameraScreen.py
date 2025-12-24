@@ -15,7 +15,6 @@ class CameraScreen:
     WIDTH, HEIGHT = 320, 240          # framebuffer resolution
     FB_BYTES = WIDTH * HEIGHT * 2      # RGB565 = 2 bytes per pixel
     FONT = ImageFont.load_default()
-    
 
     def __init__(self):
         self.picam2 = Picamera2()
@@ -39,6 +38,7 @@ class CameraScreen:
         
     def preview_camera(self):
         frame = self.picam2.capture_array()  # 640x480
+        print(frame.shape)
 
         small_frame = cv2.resize(frame, (320, 240), interpolation=cv2.INTER_NEAREST)
 
