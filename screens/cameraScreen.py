@@ -44,7 +44,9 @@ class CameraScreen:
         rot_frame = rot_frame[:240, :320, :]
 
         ui_frame = self.draw_ui(rot_frame)
-
+        
+        print(ui_frame.shape, ui_frame.dtype, ui_frame.flags['C_CONTIGUOUS'])
+        
         fb_bytes = rgb24_to_rgb565(ui_frame)
         write_to_screen(self.fb, fb_bytes)
     
