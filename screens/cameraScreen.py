@@ -55,7 +55,8 @@ class CameraScreen:
         fb_frame = np.ascontiguousarray(small_frame[:, :, :3])
         print(f"fb frame: {fb_frame.shape}")
 
-        fb_bytes = rgb24_to_rgb565(fb_frame)
+        fb_frame_with_buttons = self.draw_buttons(fb_frame)
+        fb_bytes = rgb24_to_rgb565(fb_frame_with_buttons)
         write_to_screen(self.fb, fb_bytes)
 
     def crop_center(self, frame, target_w, target_h):
@@ -97,6 +98,26 @@ class CameraScreen:
 
         return fb_frame
     
+    def draw_buttons(frame):
+        img = Image.fromarray(frame)
+        draw = ImageDraw.Draw(img)
+
+        # TFT size
+        w, h = img.size  # PIL size: (width, height)
+
+        # Example: top black bar (50px)
+        top_button_area = (0, 0, w//2, 50)
+        bottom_button_area = (w//2, h-50, w, h)
+
+        # Draw rectangles for buttons
+        draw.rectangle(top_button_area, fill=(0, 0, 255))  # blue top button
+        draw.text((5, 5), "Top", fill=(255, 255, 255))
+
+        draw.rectangle(bottom_button_area, fill=(255, 0, 0))  # red bottom button
+        draw.text((w//2 + 5, h-45), "Bottom", fill=(255, 255, 255))
+
+        return np.array(img)
+
     def draw_ui(self, frame):
         """Draws UI elements and returns the new frame"""
         # Convert to PIL for adding UI elements
