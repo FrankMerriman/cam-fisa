@@ -38,18 +38,19 @@ class CameraScreen:
         
     def preview_camera(self):
         frame = self.picam2.capture_array()
-        small_frame = frame[::2, ::2, :]  # 640x480 -> 320x240
-        rot_frame = np.rot90(small_frame, k=1)
+        
+        rot_frame = np.rot90(frame, k=1)
         rot_frame = np.ascontiguousarray(rot_frame)
-        rot_frame = rot_frame[:240, :320, :]
+
+        small_frame = rot_frame[::2, ::2, :]  # 640x480 -> 320x240 (actually rotated)
 
         # ui_frame = self.draw_ui(rot_frame)
         
         # print(ui_frame.shape, ui_frame.dtype, ui_frame.flags['C_CONTIGUOUS'])
 
         # fb_bytes = rgb24_to_rgb565(ui_frame)
-        print(rot_frame.shape, rot_frame.dtype, rot_frame.flags['C_CONTIGUOUS'])
-        fb_bytes = rgb24_to_rgb565(rot_frame)
+        print(small_frame.shape, small_frame.dtype, small_frame.flags['C_CONTIGUOUS'])
+        fb_bytes = rgb24_to_rgb565(small_frame)
         write_to_screen(self.fb, fb_bytes)
     
     def draw_ui(self, frame):
