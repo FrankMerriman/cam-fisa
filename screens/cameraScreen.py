@@ -8,15 +8,18 @@ import cv2
 from PIL import Image, ImageDraw, ImageFont
 from picamera2 import Picamera2
 from utils.writeToScreen import write_to_screen, rgb24_to_rgb565
-from utils.rpiInfo import get_cpu_temp, get_fps
+from utils.rpiInfo import get_cpu_temp, get_fps, get_gallery_path
 from evdev import InputDevice, categorize, ecodes
 import select
+from gpiozero import Button
 
 class CameraScreen:
     FB_PATH = "/dev/fb1"
     FB_W, FB_H = 240, 320
     BUTTON_HEIGHT = 50
     FONT = ImageFont.load_default()
+    button = Button(26)  # BCM numbering
+    
 
     def __init__(self):
         self.picam2 = Picamera2()
@@ -25,6 +28,7 @@ class CameraScreen:
         self.video_config = self.picam2.create_video_configuration()
         self.fb = None
         self.touch = InputDevice('/dev/input/event0')
+        self.button.when_pressed = self.capture_image()
     
     def start_camera(self):
         self.fb = open(self.FB_PATH, "r+b")
@@ -99,8 +103,8 @@ class CameraScreen:
     #     # Convert back to numpy array for writing to screen
     #     return np.array(img)
 
-    # def capture_image(self):
-    #     self.picam2.switch_mode_and_capture_file(self.capture_config, get_gallery_path() / "image.jpg")
+    def capture_image(self):
+        self.picam2.switch_mode_and_capture_file(self.capture_config, get_gallery_path() / "image.jpg")
 
     def capture_video():
         pass
