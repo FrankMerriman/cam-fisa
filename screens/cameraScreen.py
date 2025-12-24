@@ -5,16 +5,18 @@ import os
 import mmap
 import numpy as np
 import cv2
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw
 from picamera2 import Picamera2
 from utils.writeToScreen import write_to_screen, rgb24_to_rgb565
-from utils.rpiInfo import get_cpu_temp, get_fps, get_gallery_path
+from evdev import InputDevice, categorize, ecodes
+import select
 
 class CameraScreen:
+    # WIDTH, HEIGHT = 320, 240          # framebuffer resolution
+    # FB_BYTES = WIDTH * HEIGHT * 2      # RGB565 = 2 bytes per pixel  
     FB_PATH = "/dev/fb1"
-    WIDTH, HEIGHT = 320, 240          # framebuffer resolution
-    FB_BYTES = WIDTH * HEIGHT * 2      # RGB565 = 2 bytes per pixel
-    FONT = ImageFont.load_default()
+    FB_W, FB_H = 240, 320
+    BUTTON_HEIGHT = 50
 
     def __init__(self):
         self.picam2 = Picamera2()
@@ -24,16 +26,17 @@ class CameraScreen:
     
     def start_camera(self):
         # Sets up frame buffer for drawing to screen, feel like this should go elesewhere
-        self.fb_fd = os.open(self.FB_PATH, os.O_RDWR)
-        self.fb = mmap.mmap(self.fb_fd, self.FB_BYTES, mmap.MAP_SHARED, mmap.PROT_WRITE | mmap.PROT_READ)
-
+        # self.fb_fd = os.open(self.FB_PATH, os.O_RDWR)
+        # self.fb = mmap.mmap(self.fb_fd, self.FB_BYTES, mmap.MAP_SHARED, mmap.PROT_WRITE | mmap.PROT_READ)
+        self.fb_fd = open(self.FB_PATH, "r+b")
+        self.fb = self.fb_fd
         self.picam2.configure(self.preview_config)
         self.picam2.set_controls({"FrameDurationLimits": (66666, 66666)})
         self.picam2.start()
 
     def stop_camera(self):
         self.fb.close()
-        os.close(self.fb_fd)
+        # os.close(self.fb_fd)
         self.picam2.stop()
         
     def preview_camera(self):
@@ -118,22 +121,22 @@ class CameraScreen:
 
         return np.array(img)
 
-    def draw_ui(self, frame):
-        """Draws UI elements and returns the new frame"""
-        # Convert to PIL for adding UI elements
-        img = Image.fromarray(frame)
-        draw = ImageDraw.Draw(img)
+    # def draw_ui(self, frame):
+    #     """Draws UI elements and returns the new frame"""
+    #     # Convert to PIL for adding UI elements
+    #     img = Image.fromarray(frame)
+    #     draw = ImageDraw.Draw(img)
 
-        fps = get_fps()
-        cpu_temp = get_cpu_temp()
-        draw.text((5, 5), f"FPS: {fps:.1f}", font=self.FONT, fill=(255, 0, 0))
-        draw.text((5, 25), f"CPU: {cpu_temp:.1f}C", font=self.FONT, fill=(255, 0, 0))
+    #     fps = get_fps()
+    #     cpu_temp = get_cpu_temp()
+    #     draw.text((5, 5), f"FPS: {fps:.1f}", font=self.FONT, fill=(255, 0, 0))
+    #     draw.text((5, 25), f"CPU: {cpu_temp:.1f}C", font=self.FONT, fill=(255, 0, 0))
 
-        # Convert back to numpy array for writing to screen
-        return np.array(img)
+    #     # Convert back to numpy array for writing to screen
+    #     return np.array(img)
 
-    def capture_image(self):
-        self.picam2.switch_mode_and_capture_file(self.capture_config, get_gallery_path() / "image.jpg")
+    # def capture_image(self):
+    #     self.picam2.switch_mode_and_capture_file(self.capture_config, get_gallery_path() / "image.jpg")
 
     def capture_video():
         pass
