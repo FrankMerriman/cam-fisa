@@ -98,7 +98,7 @@ class CameraScreen:
 
         return fb_frame
     
-    def draw_buttons(frame):
+    def draw_buttons(self, frame):
         img = Image.fromarray(frame)
         draw = ImageDraw.Draw(img)
 
