@@ -45,8 +45,8 @@ class CameraScreen:
         small_frame = cv2.resize(rot_frame, (320, 240), interpolation=cv2.INTER_NEAREST)
 
         fb_frame = np.transpose(small_frame, (1,0,2))   # swap axes
+        fb_frame = np.flip(fb_frame, axis=1)
         fb_frame = np.ascontiguousarray(fb_frame)
-
         fb_frame = fb_frame[:, :, :3]
 
         fb_bytes = rgb24_to_rgb565(fb_frame)
