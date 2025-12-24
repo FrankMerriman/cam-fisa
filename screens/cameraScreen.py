@@ -39,10 +39,13 @@ class CameraScreen:
     def preview_camera(self):
         frame = self.picam2.capture_array()
         
+        # Need to rotate first or lose pixels and get visual issues
         rot_frame = np.rot90(frame, k=1)
         rot_frame = np.ascontiguousarray(rot_frame)
 
         small_frame = rot_frame[::2, ::2, :]  # 640x480 -> 320x240 (actually rotated)
+        small_frame = small_frame[:, :, :3]
+        small_frame = np.ascontiguousarray(small_frame)
 
         # ui_frame = self.draw_ui(rot_frame)
         
