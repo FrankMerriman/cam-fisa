@@ -42,15 +42,21 @@ class CameraScreen:
         fb_frame, top_area, bottom_area = self.draw_buttons(fb_frame)
         fb_bytes = rgb24_to_rgb565(np.ascontiguousarray(fb_frame))
         write_to_screen(self.fb, fb_bytes)
-        r, w, x = select.select([self.touch_dev], [], [], 0)
-        for event in self.touch_dev.read():
-            if event.type == ecodes.EV_ABS:
-                absevent = categorize(event)
-                x_pos, y_pos = absevent.event.value, 0
-                if top_area[0] <= x_pos <= top_area[2] and top_area[1] <= y_pos <= top_area[3]:
-                    print("Top button tapped")
-                if bottom_area[0] <= x_pos <= bottom_area[2] and bottom_area[1] <= y_pos <= bottom_area[3]:
-                    print("Bottom button tapped")
+        r, _, _ = select.select([self.touch_dev], [], [], 0)
+        if r:
+            for event in self.touch_dev.read():
+                if event.type == ecodes.EV_ABS:
+                    if event.code == ecodes.ABS_X:
+                        x_pos = event.value
+                    elif event.code == ecodes.ABS_Y:
+                        y_pos = event.value
+                    elif event.code == ecodes.ABS_PRESSURE:
+                        pressure = event.value
+                        if pressure > 0:
+                            if top_area[0] <= x_pos <= top_area[2] and top_area[1] <= y_pos <= top_area[3]:
+                                print("Top button tapped")
+                            elif bottom_area[0] <= x_pos <= bottom_area[2] and bottom_area[1] <= y_pos <= bottom_area[3]:
+                                print("Bottom button tapped")
 
     def letterbox(self, frame):
         h, w = frame.shape[:2]
