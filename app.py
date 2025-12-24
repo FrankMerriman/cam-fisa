@@ -7,4 +7,6 @@ if __name__ == "__main__":
         while True:
             cam_screen.preview_camera()
     except KeyboardInterrupt:
+        print("Exiting...")
+    finally:
         cam_screen.stop_camera()

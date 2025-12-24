@@ -38,7 +38,7 @@ class CameraScreen:
     def preview_camera(self):
         frame = self.picam2.capture_array()
         small_frame = frame[::2, ::2, :]  # 640x480 -> 320x240
-        small_frame = self.draw_ui(self, small_frame)
+        small_frame = self.draw_ui(small_frame)
     
         # Need to convert to RGB565 for the framebuffer, otherwise screen is garbled noise
         fb_bytes = rgb24_to_rgb565(small_frame)
