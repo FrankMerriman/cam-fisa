@@ -7,13 +7,14 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 from picamera2 import Picamera2
 from utils.writeToScreen import write_to_screen, rgb24_to_rgb565
-from utils.rpiInfo import get_cpu_temp, get_fps
+from utils.rpiInfo import get_cpu_temp, get_fps, get_gallery_path
 
 class CameraScreen:
     FB_PATH = "/dev/fb1"
     WIDTH, HEIGHT = 320, 240          # framebuffer resolution
     FB_BYTES = WIDTH * HEIGHT * 2      # RGB565 = 2 bytes per pixel
     FONT = ImageFont.load_default()
+    
 
     def __init__(self):
         self.picam2 = Picamera2()
@@ -38,6 +39,7 @@ class CameraScreen:
     def preview_camera(self):
         frame = self.picam2.capture_array()
         small_frame = frame[::2, ::2, :]  # 640x480 -> 320x240
+        small_frame = np.rot90(small_frame, k=1)
         small_frame = self.draw_ui(small_frame)
     
         # Need to convert to RGB565 for the framebuffer, otherwise screen is garbled noise
@@ -57,11 +59,9 @@ class CameraScreen:
 
         # Convert back to numpy array for writing to screen
         return np.array(img)
-    
-    
 
     def capture_image(self):
-        self.picam2.switch_mode_and_capture_file(self.capture_config, "image.jpg")
+        self.picam2.switch_mode_and_capture_file(self.capture_config, get_gallery_path() / "image.jpg")
 
     def capture_video():
         pass
