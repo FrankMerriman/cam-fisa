@@ -18,6 +18,6 @@ def get_fps():
     return fps
 
 def get_gallery_path():
-    gallery_dir = Path.home() / "user" / "gallery"
+    gallery_dir = Path.home() / "gallery"
     gallery_dir.mkdir(parents=True, exist_ok=True)
     return gallery_dir

@@ -105,7 +105,9 @@ class CameraScreen:
     #     return np.array(img)
 
     def capture_image(self):
-        self.picam2.switch_mode_and_capture_file(self.capture_config, get_gallery_path() / "image.jpg")
+        path = get_gallery_path() / "image.jpg"
+        print(f"Capturing image to {path}")
+        self.picam2.switch_mode_and_capture_file(self.capture_config, path)
 
     def capture_video():
         pass
