@@ -4,6 +4,7 @@
 import os
 import mmap
 import numpy as np
+import cv2
 from PIL import Image, ImageDraw, ImageFont
 from picamera2 import Picamera2
 from utils.writeToScreen import write_to_screen, rgb24_to_rgb565
@@ -37,23 +38,18 @@ class CameraScreen:
         self.picam2.stop()
         
     def preview_camera(self):
-        frame = self.picam2.capture_array()
-        
-        # Need to rotate first or lose pixels and get visual issues
-        rot_frame = np.rot90(frame, k=1)
-        rot_frame = np.ascontiguousarray(rot_frame)
+        frame = self.picam2.capture_array()  # 640x480
 
-        small_frame = rot_frame[::2, ::2, :]  # 640x480 -> 320x240 (actually rotated)
-        small_frame = small_frame[:, :, :3]
-        small_frame = np.ascontiguousarray(small_frame)
+        rot_frame = np.rot90(frame, k=1)     # now 480x640
 
-        # ui_frame = self.draw_ui(rot_frame)
-        
-        # print(ui_frame.shape, ui_frame.dtype, ui_frame.flags['C_CONTIGUOUS'])
+        small_frame = cv2.resize(rot_frame, (320, 240), interpolation=cv2.INTER_NEAREST)
 
-        # fb_bytes = rgb24_to_rgb565(ui_frame)
-        print(small_frame.shape, small_frame.dtype, small_frame.flags['C_CONTIGUOUS'])
-        fb_bytes = rgb24_to_rgb565(small_frame)
+        fb_frame = np.transpose(small_frame, (1,0,2))   # swap axes
+        fb_frame = np.ascontiguousarray(fb_frame)
+
+        fb_frame = fb_frame[:, :, :3]
+
+        fb_bytes = rgb24_to_rgb565(fb_frame)
         write_to_screen(self.fb, fb_bytes)
     
     def draw_ui(self, frame):
