@@ -12,6 +12,7 @@ from utils.rpiInfo import get_cpu_temp, get_fps, get_gallery_path
 from evdev import InputDevice, categorize, ecodes
 import select
 from gpiozero import Button
+from threading import Thread
 
 class CameraScreen:
     FB_PATH = "/dev/fb1"
@@ -28,7 +29,7 @@ class CameraScreen:
         self.video_config = self.picam2.create_video_configuration()
         self.fb = None
         self.touch = InputDevice('/dev/input/event0')
-        self.button.when_pressed = self.capture_image()
+        self.button.when_pressed = lambda: Thread(target=self.capture_image).start()
     
     def start_camera(self):
         self.fb = open(self.FB_PATH, "r+b")
