@@ -40,7 +40,29 @@ class CameraScreen:
         frame = self.picam2.capture_array()  # 640x480
         print(f"frame: {frame.shape}")
 
-        small_frame = cv2.resize(frame, (240, 320), interpolation=cv2.INTER_NEAREST)
+         # TFT size
+        FB_W, FB_H = 240, 320
+
+        # Camera frame dimensions
+        h, w = frame.shape[:2]
+
+        cam_ratio = w / h
+        tft_ratio = FB_W / FB_H  # 240 / 320 = 0.75
+
+        # Crop to match TFT aspect ratio (center crop)
+        if cam_ratio > tft_ratio:
+            # Camera is wider → crop left and right equally
+            new_w = int(h * tft_ratio)
+            x_start = (w - new_w) // 2
+            crop_frame = frame[:, x_start:x_start + new_w, :]
+        else:
+            # Camera is taller → crop top and bottom equally
+            new_h = int(w / tft_ratio)
+            y_start = (h - new_h) // 2
+            crop_frame = frame[y_start:y_start + new_h, :, :]
+        print(f"crop frame: {crop_frame.shape}")
+
+        small_frame = cv2.resize(crop_frame, (240, 320), interpolation=cv2.INTER_NEAREST)
         print(f"small frame: {small_frame.shape}")
 
         fb_frame = np.ascontiguousarray(small_frame[:, :, :3])
