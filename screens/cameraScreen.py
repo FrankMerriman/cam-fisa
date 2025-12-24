@@ -11,7 +11,7 @@ from utils.rpiInfo import get_cpu_temp, get_fps, get_gallery_path
 
 class CameraScreen:
     FB_PATH = "/dev/fb1"
-    WIDTH, HEIGHT = 320, 240          # framebuffer resolution
+    WIDTH, HEIGHT = 240, 320          # framebuffer resolution (rotated 90degree cause of camera orientation)
     FB_BYTES = WIDTH * HEIGHT * 2      # RGB565 = 2 bytes per pixel
     FONT = ImageFont.load_default()
     
@@ -39,7 +39,7 @@ class CameraScreen:
     def preview_camera(self):
         frame = self.picam2.capture_array()
         small_frame = frame[::2, ::2, :]  # 640x480 -> 320x240
-        # small_frame = np.ascontiguousarray(np.rot90(small_frame, k=1))
+        small_frame = np.rot90(small_frame, k=1)
         # small_frame = self.draw_ui(small_frame)
     
         # Need to convert to RGB565 for the framebuffer, otherwise screen is garbled noise
