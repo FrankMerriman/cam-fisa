@@ -12,8 +12,8 @@ from evdev import InputDevice, categorize, ecodes
 import select
 
 class CameraScreen:
-    # WIDTH, HEIGHT = 320, 240          # framebuffer resolution
-    # FB_BYTES = WIDTH * HEIGHT * 2      # RGB565 = 2 bytes per pixel  
+    WIDTH, HEIGHT = 320, 240          # framebuffer resolution
+    FB_BYTES = WIDTH * HEIGHT * 2      # RGB565 = 2 bytes per pixel  
     FB_PATH = "/dev/fb1"
     FB_W, FB_H = 240, 320
     BUTTON_HEIGHT = 50
@@ -26,17 +26,15 @@ class CameraScreen:
     
     def start_camera(self):
         # Sets up frame buffer for drawing to screen, feel like this should go elesewhere
-        # self.fb_fd = os.open(self.FB_PATH, os.O_RDWR)
-        # self.fb = mmap.mmap(self.fb_fd, self.FB_BYTES, mmap.MAP_SHARED, mmap.PROT_WRITE | mmap.PROT_READ)
-        self.fb_fd = open(self.FB_PATH, "r+b")
-        self.fb = self.fb_fd
+        self.fb_fd = os.open(self.FB_PATH, os.O_RDWR)
+        self.fb = mmap.mmap(self.fb_fd, self.FB_BYTES, mmap.MAP_SHARED, mmap.PROT_WRITE | mmap.PROT_READ)
         self.picam2.configure(self.preview_config)
         self.picam2.set_controls({"FrameDurationLimits": (66666, 66666)})
         self.picam2.start()
 
     def stop_camera(self):
         self.fb.close()
-        # os.close(self.fb_fd)
+        os.close(self.fb_fd)
         self.picam2.stop()
         
     def preview_camera(self):
