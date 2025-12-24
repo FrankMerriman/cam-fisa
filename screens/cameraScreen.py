@@ -15,7 +15,7 @@ from gpiozero import Button
 from threading import Thread
 
 class CameraScreen:
-    FB_PATH = "/dev/fb1"
+    FB_PATH = "/dev/fb0"
     FB_W, FB_H = 240, 320
     BUTTON_HEIGHT = 50
     FONT = ImageFont.load_default()
