@@ -39,7 +39,7 @@ class CameraScreen:
     def preview_camera(self):
         frame = self.picam2.capture_array()
         fb_frame = self.letterbox(frame)
-        fb_frame, top_area, bottom_area = self.draw_buttons(fb_frame)
+        # fb_frame, top_area, bottom_area = self.draw_buttons(fb_frame)
         fb_bytes = rgb24_to_rgb565(np.ascontiguousarray(fb_frame))
         write_to_screen(self.fb, fb_bytes)
         x, y, pressure = self.read_touch()
