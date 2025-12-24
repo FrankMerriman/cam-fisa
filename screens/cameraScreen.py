@@ -13,8 +13,6 @@ from evdev import InputDevice, categorize, ecodes
 import select
 
 class CameraScreen:
-    WIDTH, HEIGHT = 320, 240          # framebuffer resolution
-    FB_BYTES = WIDTH * HEIGHT * 2      # RGB565 = 2 bytes per pixel  
     FB_PATH = "/dev/fb1"
     FB_W, FB_H = 240, 320
     BUTTON_HEIGHT = 50
@@ -25,118 +23,70 @@ class CameraScreen:
         self.preview_config = self.picam2.create_preview_configuration(main={"size": (640, 480)}) # Needs to be halved again to fit display, this is smallest available
         self.capture_config = self.picam2.create_still_configuration(main={"size": (2592, 1944)})
         self.video_config = self.picam2.create_video_configuration()
+        self.fb = None
+        self.touch_dev = InputDevice('/dev/input/event0')
     
     def start_camera(self):
-        # Sets up frame buffer for drawing to screen, feel like this should go elesewhere
-        # self.fb_fd = os.open(self.FB_PATH, os.O_RDWR)
-        # self.fb = mmap.mmap(self.fb_fd, self.FB_BYTES, mmap.MAP_SHARED, mmap.PROT_WRITE | mmap.PROT_READ)
-        self.fb_fd = open(self.FB_PATH, "r+b")
-        self.fb = self.fb_fd
+        self.fb = open(self.FB_PATH, "r+b")
         self.picam2.configure(self.preview_config)
-        self.picam2.set_controls({"FrameDurationLimits": (66666, 66666)})
+        # self.picam2.set_controls({"FrameDurationLimits": (66666, 66666)})
         self.picam2.start()
 
     def stop_camera(self):
         self.fb.close()
-        # os.close(self.fb_fd)
         self.picam2.stop()
         
     def preview_camera(self):
-        frame = self.picam2.capture_array()  # 640x480
-        print(f"frame: {frame.shape}")
-
-        # TFT size
-        FB_W, FB_H = 240, 320
-
-        # Choose one of these two (comment/uncomment to test)
-        # crop_frame = self.crop_center(frame, FB_W, FB_H)
-        crop_frame = self.letterbox(frame, FB_W, FB_H)
-        
-        print(f"processed frame: {crop_frame.shape}")
-
-        small_frame = cv2.resize(crop_frame, (FB_W, FB_H), interpolation=cv2.INTER_NEAREST)
-        print(f"small frame: {small_frame.shape}")
-
-        fb_frame = np.ascontiguousarray(small_frame[:, :, :3])
-        print(f"fb frame: {fb_frame.shape}")
-
-        fb_frame_with_buttons = self.draw_buttons(fb_frame)
-        fb_frame_with_buttons = self.draw_ui(fb_frame_with_buttons)
-        fb_bytes = rgb24_to_rgb565(fb_frame_with_buttons)
+        frame = self.picam2.capture_array()
+        fb_frame = self.letterbox(frame)
+        fb_frame, top_area, bottom_area = self.draw_buttons(fb_frame)
+        fb_bytes = rgb24_to_rgb565(np.ascontiguousarray(fb_frame))
         write_to_screen(self.fb, fb_bytes)
+        r, w, x = select.select([self.touch_dev], [], [], 0)
+        for event in self.touch_dev.read():
+            if event.type == ecodes.EV_ABS:
+                absevent = categorize(event)
+                x_pos, y_pos = absevent.event.value, 0
+                if top_area[0] <= x_pos <= top_area[2] and top_area[1] <= y_pos <= top_area[3]:
+                    print("Top button tapped")
+                if bottom_area[0] <= x_pos <= bottom_area[2] and bottom_area[1] <= y_pos <= bottom_area[3]:
+                    print("Bottom button tapped")
 
-    def crop_center(self, frame, target_w, target_h):
+    def letterbox(self, frame):
         h, w = frame.shape[:2]
-        cam_ratio = w / h
-        tft_ratio = target_w / target_h
-
-        if cam_ratio > tft_ratio:
-            # Camera is wider → crop left/right
-            new_w = int(h * tft_ratio)
-            x_start = (w - new_w) // 2
-            return frame[:, x_start:x_start + new_w, :]
-        else:
-            # Camera is taller → crop top/bottom
-            new_h = int(w / tft_ratio)
-            y_start = (h - new_h) // 2
-            return frame[y_start:y_start + new_h, :, :]
-
-    def letterbox(self, frame, target_w, target_h):
-        h, w = frame.shape[:2]
-
-        scale_w = target_w / w
-        scale_h = target_h / h
-        scale = min(scale_w, scale_h)
-
-        new_w = int(w * scale)
-        new_h = int(h * scale)
-
-        # Resize
+        scale = min(self.FB_W / w, self.FB_H / h)
+        new_w, new_h = int(w * scale), int(h * scale)
         resized = cv2.resize(frame, (new_w, new_h), interpolation=cv2.INTER_NEAREST)
-
-        # Black canvas
-        fb_frame = np.zeros((target_h, target_w, 3), dtype=np.uint8)
-
-        # Center the image
-        x_offset = (target_w - new_w) // 2
-        y_offset = (target_h - new_h) // 2
+        fb_frame = np.zeros((self.FB_H, self.FB_W, 3), dtype=np.uint8)
+        x_offset = (self.FB_W - new_w) // 2
+        y_offset = (self.FB_H - new_h) // 2
         fb_frame[y_offset:y_offset+new_h, x_offset:x_offset+new_w, :] = resized[:, :, :3]
-
         return fb_frame
     
     def draw_buttons(self, frame):
         img = Image.fromarray(frame)
         draw = ImageDraw.Draw(img)
-
-        # TFT size
-        w, h = img.size  # PIL size: (width, height)
-
-        # Example: top black bar (50px)
-        top_button_area = (0, 0, w//2, 50)
-        bottom_button_area = (w//2, h-50, w, h)
-
-        # Draw rectangles for buttons
-        draw.rectangle(top_button_area, fill=(0, 0, 255))  # blue top button
+        top_button_area = (0, 0, self.FB_W // 2, self.BUTTON_HEIGHT)
+        bottom_button_area = (self.FB_W // 2, self.FB_H - self.BUTTON_HEIGHT, self.FB_W, self.FB_H)
+        draw.rectangle(top_button_area, fill=(0, 0, 255))
         draw.text((5, 5), "Top", fill=(255, 255, 255))
+        draw.rectangle(bottom_button_area, fill=(255, 0, 0))
+        draw.text((self.FB_W//2 + 5, self.FB_H - 45), "Bottom", fill=(255, 255, 255))
+        return np.array(img), top_button_area, bottom_button_area
 
-        draw.rectangle(bottom_button_area, fill=(255, 0, 0))  # red bottom button
-        draw.text((w//2 + 5, h-45), "Bottom", fill=(255, 255, 255))
+    # def draw_ui(self, frame):
+    #     """Draws UI elements and returns the new frame"""
+    #     # Convert to PIL for adding UI elements
+    #     img = Image.fromarray(frame)
+    #     draw = ImageDraw.Draw(img)
 
-        return np.array(img)
+    #     fps = get_fps()
+    #     cpu_temp = get_cpu_temp()
+    #     draw.text((5, 5), f"FPS: {fps:.1f}", font=self.FONT, fill=(255, 0, 0))
+    #     draw.text((5, 25), f"CPU: {cpu_temp:.1f}C", font=self.FONT, fill=(255, 0, 0))
 
-    def draw_ui(self, frame):
-        """Draws UI elements and returns the new frame"""
-        # Convert to PIL for adding UI elements
-        img = Image.fromarray(frame)
-        draw = ImageDraw.Draw(img)
-
-        fps = get_fps()
-        cpu_temp = get_cpu_temp()
-        draw.text((5, 5), f"FPS: {fps:.1f}", font=self.FONT, fill=(255, 0, 0))
-        draw.text((5, 25), f"CPU: {cpu_temp:.1f}C", font=self.FONT, fill=(255, 0, 0))
-
-        # Convert back to numpy array for writing to screen
-        return np.array(img)
+    #     # Convert back to numpy array for writing to screen
+    #     return np.array(img)
 
     # def capture_image(self):
     #     self.picam2.switch_mode_and_capture_file(self.capture_config, get_gallery_path() / "image.jpg")
