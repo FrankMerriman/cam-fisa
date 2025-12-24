@@ -8,6 +8,7 @@ import cv2
 from PIL import Image, ImageDraw
 from picamera2 import Picamera2
 from utils.writeToScreen import write_to_screen, rgb24_to_rgb565
+from utils.rpiInfo import get_cpu_temp, get_fps
 from evdev import InputDevice, categorize, ecodes
 import select
 
@@ -57,6 +58,7 @@ class CameraScreen:
         print(f"fb frame: {fb_frame.shape}")
 
         fb_frame_with_buttons = self.draw_buttons(fb_frame)
+        fb_frame_with_buttons = self.draw_ui(fb_frame_with_buttons)
         fb_bytes = rgb24_to_rgb565(fb_frame_with_buttons)
         write_to_screen(self.fb, fb_bytes)
 
@@ -119,19 +121,19 @@ class CameraScreen:
 
         return np.array(img)
 
-    # def draw_ui(self, frame):
-    #     """Draws UI elements and returns the new frame"""
-    #     # Convert to PIL for adding UI elements
-    #     img = Image.fromarray(frame)
-    #     draw = ImageDraw.Draw(img)
+    def draw_ui(self, frame):
+        """Draws UI elements and returns the new frame"""
+        # Convert to PIL for adding UI elements
+        img = Image.fromarray(frame)
+        draw = ImageDraw.Draw(img)
 
-    #     fps = get_fps()
-    #     cpu_temp = get_cpu_temp()
-    #     draw.text((5, 5), f"FPS: {fps:.1f}", font=self.FONT, fill=(255, 0, 0))
-    #     draw.text((5, 25), f"CPU: {cpu_temp:.1f}C", font=self.FONT, fill=(255, 0, 0))
+        fps = get_fps()
+        cpu_temp = get_cpu_temp()
+        draw.text((5, 5), f"FPS: {fps:.1f}", font=self.FONT, fill=(255, 0, 0))
+        draw.text((5, 25), f"CPU: {cpu_temp:.1f}C", font=self.FONT, fill=(255, 0, 0))
 
-    #     # Convert back to numpy array for writing to screen
-    #     return np.array(img)
+        # Convert back to numpy array for writing to screen
+        return np.array(img)
 
     # def capture_image(self):
     #     self.picam2.switch_mode_and_capture_file(self.capture_config, get_gallery_path() / "image.jpg")
