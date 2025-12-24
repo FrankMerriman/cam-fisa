@@ -38,11 +38,13 @@ class CameraScreen:
         
     def preview_camera(self):
         frame = self.picam2.capture_array()  # 640x480
-        print(frame.shape)
+        print(f"frame: {frame.shape}")
 
-        small_frame = cv2.resize(frame, (320, 240), interpolation=cv2.INTER_NEAREST)
+        small_frame = cv2.resize(frame, (240, 320), interpolation=cv2.INTER_NEAREST)
+        print(f"small frame: {small_frame.shape}")
 
         fb_frame = np.ascontiguousarray(small_frame[:, :, :3])
+        print(f"fb frame: {fb_frame.shape}")
 
         fb_bytes = rgb24_to_rgb565(fb_frame)
         write_to_screen(self.fb, fb_bytes)
