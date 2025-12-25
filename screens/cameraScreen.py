@@ -135,9 +135,5 @@ class CameraScreen:
         self.picam2.switch_mode_and_capture_file(self.capture_config, path)
         # Account for sensor rotation
         image = Image.open(path)
-        image = image.transpose(Image.ROTATE_270)
+        image = image.transpose(Image.ROTATE_90)
         image.save(path)
-
-
-    def capture_video():
-        pass
