@@ -28,7 +28,7 @@ class CameraScreen:
         self.video_config = self.picam2.create_video_configuration()
         self.fb = None
         self.touch = InputDevice('/dev/input/event0')
-        self.button.when_pressed = lambda: Thread(target=self.capture_image).start()
+        self.button.when_pressed = self.capture_image
     
     def start_camera(self):
         self.fb = open(self.FB_PATH, "r+b")
