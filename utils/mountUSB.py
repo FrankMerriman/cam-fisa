@@ -1,7 +1,7 @@
 import subprocess
 from pathlib import Path
 
-def mount_usb(self, mount_point="/mnt/usb"):
+def mount_usb(mount_point="/mnt/usb"):
         """
         Detects a USB drive and mounts it.
         Returns Path to mount point if successful, else None.
