@@ -8,6 +8,7 @@ from PIL import Image, ImageDraw, ImageFont
 from picamera2 import Picamera2
 from utils.writeToScreen import write_to_screen, rgb24_to_rgb565
 from utils.rpiInfo import get_cpu_temp, get_fps, get_gallery_path
+from utils.mountUSB import mount_usb
 from evdev import InputDevice, categorize, ecodes
 import select
 from gpiozero import Button
@@ -33,6 +34,12 @@ class CameraScreen:
         
         self.button.when_pressed = self.on_button_pressed
         self.button.when_released = self.on_button_released
+        self.usb_path = mount_usb()
+        if self.usb_path:
+            self.gallery_path = self.usb_path / "gallery"
+            self.gallery_path.mkdir(exist_ok=True)
+        else:
+            raise RuntimeError("No USB drive found. Cannot create gallery.")
 
     def on_button_pressed(self):
         if not self.button_locked:
@@ -116,13 +123,12 @@ class CameraScreen:
 
     def capture_image(self):
         # Need to add a cache to start _1 from to stop counting from starte very time
-        gallery_path = get_gallery_path()
         file_name = "CAMFISA_0.jpg"
-        path = gallery_path / file_name
+        path = self.gallery_path / file_name
         counter = 1
         while path.exists():
             file_name = f"CAMFISA_{counter}.jpg"
-            path = gallery_path / file_name
+            path = self.gallery_path / file_name
             counter += 1
 
         print(f"Capturing image to {path}")
