@@ -1,11 +1,12 @@
 import subprocess
 from pathlib import Path
 
-def mount_usb(mount_point="/mnt/usb"):
+def mount_usb():
         """
         Detects a USB drive and mounts it.
         Returns Path to mount point if successful, else None.
         """
+        mount_point = Path.home / "usb_mount"
         Path(mount_point).mkdir(parents=True, exist_ok=True)
 
         # List block devices
