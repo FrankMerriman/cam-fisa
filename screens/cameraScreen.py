@@ -105,9 +105,9 @@ class CameraScreen:
     def capture_image(self):
         # Need to add a cache to start _1 from to stop counting from starte very time
         gallery_path = get_gallery_path()
-        file_name = "CAMFISA_1"
+        file_name = "CAMFISA_0.jpg"
         path = gallery_path / file_name
-        counter = 2
+        counter = 1
         while path.exists():
             file_name = f"CAMFISA_{counter}.jpg"
             path = gallery_path / file_name
