@@ -1,8 +1,7 @@
 # This file lays out the functionality of the main camera screen
 # It has a live feed of what the module sees + some light UI elements
 # to use the touch screen to interact with the camera and its quick menu options
-import os
-import mmap
+import time
 import numpy as np
 import cv2
 from PIL import Image, ImageDraw, ImageFont
@@ -34,7 +33,6 @@ class CameraScreen:
     def start_camera(self):
         self.fb = open(self.FB_PATH, "r+b")
         self.picam2.configure(self.preview_config)
-        # self.picam2.set_controls({"FrameDurationLimits": (66666, 66666)})
         self.picam2.start()
 
     def stop_camera(self):
@@ -105,7 +103,16 @@ class CameraScreen:
     #     return np.array(img)
 
     def capture_image(self):
-        path = get_gallery_path() / "image.jpg"
+        # Need to add a cache to start _1 from to stop counting from starte very time
+        gallery_path = get_gallery_path()
+        file_name = "CAMFISA_1"
+        path = gallery_path / file_name
+        counter = 2
+        while path.exists():
+            file_name = f"CAMFISA_{counter}.jpg"
+            path = gallery_path / file_name
+            counter += 1
+
         print(f"Capturing image to {path}")
         self.picam2.switch_mode_and_capture_file(self.capture_config, path)
 
