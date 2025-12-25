@@ -12,13 +12,13 @@ NC='\033[0m'                # no color / reset
 # Need to fill 13 lines and then the image to perfectly fit screen
 echo "
 
-   WELCOME TO CAMFISA
+        WELCOME TO CAMFISA
 
-    MERRY CHRISTMAS
-        ANFISA
+          MERRY CHRISTMAS
+              ANFISA
 
-      I LOVE YOU
-         ♡♡♡
+            I LOVE YOU
+
 
 
 
