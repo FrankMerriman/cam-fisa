@@ -18,7 +18,6 @@ class CameraScreen:
     FB_W, FB_H = 240, 320
     BUTTON_HEIGHT = 50
     FONT = ImageFont.load_default()
-    button = Button(26)  # BCM numbering
     
 
     def __init__(self):
@@ -28,8 +27,21 @@ class CameraScreen:
         self.video_config = self.picam2.create_video_configuration()
         self.fb = None
         self.touch = InputDevice('/dev/input/event0')
-        self.button.when_pressed = self.capture_image
-    
+
+        self.button = Button(26, bounce_time=0.05)  # small debounce
+        self.button_locked = False  # lock flag
+        
+        self.button.when_pressed = self.on_button_pressed
+        self.button.when_released = self.on_button_released
+
+    def on_button_pressed(self):
+        if not self.button_locked:
+            self.button_locked = True
+            self.capture_image()
+
+    def on_button_released(self):
+        self.button_locked = False
+
     def start_camera(self):
         self.fb = open(self.FB_PATH, "r+b")
         self.picam2.configure(self.preview_config)
