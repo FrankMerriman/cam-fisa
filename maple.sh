@@ -10,19 +10,19 @@ RED='\033[38;5;205m'        # bright pink
 NC='\033[0m'                # no color / reset
 
 # Need to fill 13 lines and then the image to perfectly fit screen
-echo "1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13"
+echo "
+
+   WELCOME TO CAMFISA
+
+    MERRY CHRISTMAS
+        ANFISA
+
+      I LOVE YOU
+         ♡♡♡
+
+
+
+"
 echo -e "${BROWN}
 ┌φ╣╠╠╣╗              ╗▒╬╬╣φµ
 á╬╬╣▓▓╬╠╣▄φ▓▓▓▓▓▓▓▓Æ▄╬╣╣▓▓▒▒╠▌
