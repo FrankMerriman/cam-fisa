@@ -10,7 +10,7 @@ RED='\033[38;5;205m'        # bright pink
 NC='\033[0m'                # no color / reset
 
 # Need to fill 13 lines and then the image to perfectly fit screen
-echo"1
+echo "1
 2
 3
 4
