@@ -12,7 +12,7 @@ class ScreenManager:
         self.gallery_screen = gallery_screen
 
         self.active_screen = cam_screen
-        cam_screen.start_camera()
+        cam_screen.load_screen()
         
     def on_screen_button_pressed(self):
         if not self.screen_button_locked:
@@ -25,13 +25,11 @@ class ScreenManager:
 
     def swap_screen(self):
         if self.active_screen == self.cam_screen:
-            print("Switching to Gallery Screen")
-            self.cam_screen.stop_camera()
-            self.gallery_screen.load_gallery_images()
+            self.cam_screen.stop_camera() # This needs to go somewhere cleaner
+            self.gallery_screen.load_screen()
             self.active_screen = self.gallery_screen
         elif self.active_screen == self.gallery_screen:
-            print("Switching to Camera Preview Screen")
-            self.cam_screen.start_camera()
+            self.cam_screen.load_screen()
             self.active_screen = self.cam_screen
 
     def get_active_screen(self):

@@ -5,3 +5,6 @@ class Screen:
     
     def process(self):
         pass
+
+    def load_screen(self):
+        pass

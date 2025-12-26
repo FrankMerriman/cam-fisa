@@ -80,7 +80,14 @@ class GalleryScreen(Screen):
 
             img = Image.open(current_image_path)
             img.convert("RGB")
+            image = image.transpose(Image.ROTATE_90) # Account for sensor alignment on camera body
             img = img.resize((self.fb.width, self.fb.height), Image.BILINEAR)
             fb_frame = np.asarray(img, dtype=np.uint8)
             fb_bytes = self.fb.rgb24_to_rgb565(np.ascontiguousarray(fb_frame))
             self.fb.write_to_screen(fb_bytes)
+
+    # Makes sure vars that are needed when screen is swapped to are available
+    def load_screen(self):
+        print("Loading gallery screen")
+        self.load_gallery_images()
+        self.release_gallery_lock()

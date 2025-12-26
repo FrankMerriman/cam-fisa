@@ -44,11 +44,6 @@ class CameraScreen(Screen):
     def on_button_released(self):
         self.button_locked = False
 
-    def start_camera(self):
-        print("starting camera preview")
-        self.picam2.configure(self.preview_config)
-        self.picam2.start()
-
     def stop_camera(self):
         self.picam2.stop()
         
@@ -138,3 +133,8 @@ class CameraScreen(Screen):
         image = Image.open(path)
         image = image.transpose(Image.ROTATE_90)
         image.save(path)
+    
+    def load_screen(self):
+        print("Loading camera screen")
+        self.picam2.configure(self.preview_config)
+        self.picam2.start()
