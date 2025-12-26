@@ -52,7 +52,7 @@ try:
                 cam_screen.preview_camera()
             elif current_screen == ScreenTypes.GALLERY:
                 print("Switching to camera Gallery Screen")
-                gallery_screen.show_gallery()
+                gallery_screen.show_image()
             
 except KeyboardInterrupt:
     print("Exiting...")
