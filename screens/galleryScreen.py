@@ -18,10 +18,12 @@ class GalleryScreen:
         self.fb = fb
 
     def on_right_button_pressed(self):
+        print("Right button pressed")
         self.gallery_lock = False
         self.index += 1
 
     def on_left_button_pressed(self):
+        print("Left button pressed")
         self.gallery_lock = False
         self.index -= 1
         
