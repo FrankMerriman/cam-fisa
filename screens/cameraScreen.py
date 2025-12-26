@@ -11,15 +11,14 @@ from utils.mountUSB import mount_usb
 from evdev import InputDevice, categorize, ecodes
 import select
 from gpiozero import Button
-from threading import Thread
+from screens.screen import Screen
 
-class CameraScreen:
+class CameraScreen(Screen):
     FB_PATH = "/dev/fb0"
     FB_W, FB_H = 240, 320
     BUTTON_HEIGHT = 50
     FONT = ImageFont.load_default()
     
-
     def __init__(self, fb):
         self.picam2 = Picamera2()
         self.preview_config = self.picam2.create_preview_configuration(main={"size": (640, 480)}) # Needs to be halved again to fit display, this is smallest available
@@ -59,7 +58,7 @@ class CameraScreen:
         # self.fb.close()
         self.picam2.stop()
         
-    def preview_camera(self):
+    def process(self):
         frame = self.picam2.capture_array()
         fb_frame = self.letterbox(frame)
         # fb_frame, top_area, bottom_area = self.draw_buttons(fb_frame)

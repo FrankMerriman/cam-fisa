@@ -2,9 +2,10 @@
 # It shows previously capture images @ 320x240 with the ability to scroll left to right
 # You can also zoom in and out of images. Zooming out far enough displays a grid of multiple images.
 from utils.mountUSB import mount_usb
+from screens.screen import Screen
 from gpiozero import Button
 
-class GalleryScreen:
+class GalleryScreen(Screen):
     def __init__(self, fb):
         # Once I have a function for it, do a check for USB mount
         # For now we can assume it is working
@@ -34,7 +35,7 @@ class GalleryScreen:
         self.modulo = len(self.images)
         self.index = len(self.images) - 1  # Start at the most recent image
 
-    def show_image(self):
+    def process(self):
         # Gallery lock is meant to stop redrawing of the same image.
         # Only redraw when the index changes, as lock is released only by button press
         if not self.gallery_lock:
