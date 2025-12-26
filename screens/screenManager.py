@@ -1,11 +1,5 @@
-import screens.cameraScreen as cameraScreen
-import screens.galleryScreen as galleryScreen
-import enum
-from gpiozero import Button
 
-class ScreenTypes(enum.Enum):
-    PREVIEW = 1
-    GALLERY = 2
+from gpiozero import Button
 
 class ScreenManager:
     def __init__(self, fb, cam_screen, gallery_screen):

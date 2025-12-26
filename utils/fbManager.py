@@ -1,7 +1,7 @@
 # Functions for writing to the rpi screen
 import numpy as np
 
-class writeToScreen:
+class FBManager:
     """Framebuffer manager to handle opening and closing the framebuffer device"""
     def __init__(self, fb_path="/dev/fb0"):
         # self.fb_path = fb_path
