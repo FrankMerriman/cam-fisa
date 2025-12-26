@@ -55,12 +55,11 @@ class CameraScreen(Screen):
         self.picam2.start()
 
     def stop_camera(self):
-        # self.fb.close()
         self.picam2.stop()
         
     def process(self):
+        print("Processing camera frame")
         frame = self.picam2.capture_array()
-        print("Captured frame from camera: ", frame.shape)
         fb_frame = self.letterbox(frame)
         # fb_frame, top_area, bottom_area = self.draw_buttons(fb_frame)
         fb_bytes = self.fb.rgb24_to_rgb565(np.ascontiguousarray(fb_frame))

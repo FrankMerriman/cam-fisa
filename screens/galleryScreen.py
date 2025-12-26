@@ -39,12 +39,12 @@ class GalleryScreen(Screen):
     def process(self):
         # Gallery lock is meant to stop redrawing of the same image.
         # Only redraw when the index changes, as lock is released only by button press
-        while True:
-            if self.modulo == 0:
-                print("No images in gallery.")
-                return
+        print("Processing gallery frame")
+        if self.modulo == 0:
+            print("No images in gallery.")
+            return
 
-            current_image_path = self.images[self.index % self.modulo]
+        current_image_path = self.images[self.index % self.modulo]
         # print(f"Displaying image: {current_image_path}")
         # fb_bytes = rgb24_to_rgb565(np.ascontiguousarray(fb_frame))
         # write_to_screen(self.fb, fb_bytes)
