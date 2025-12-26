@@ -5,7 +5,7 @@ from utils.mountUSB import mount_usb
 from gpiozero import Button
 
 class GalleryScreen:
-    def __init__(self):
+    def __init__(self, fb):
         # Once I have a function for it, do a check for USB mount
         # For now we can assume it is working
         self.right_button = Button(24, bounce_time=1)  # small debounce
@@ -13,6 +13,7 @@ class GalleryScreen:
         self.gallery_path = mount_usb() / "gallery"
         self.images = []
         self.gallery_lock = False
+        self.fb = fb
 
     def on_right_button_pressed(self):
         self.gallery_lock = False

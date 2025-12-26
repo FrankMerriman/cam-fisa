@@ -24,6 +24,7 @@ def swap_screen():
     global current_screen
     global cam_screen
     global gallery_screen
+
     if current_screen == ScreenTypes.PREVIEW:
         print("Switching to Gallery Screen")
         cam_screen.stop_camera()
@@ -36,15 +37,13 @@ def swap_screen():
 
 screen_button = Button(25, bounce_time=0.05)
 screen_button_locked = False
-
 screen_button.when_pressed = on_screen_button_pressed
 screen_button.when_released = on_screen_button_released
 
 fb = writeToScreen.writeToScreen() # Framebuffer manager, need to pass to screens
-
 current_screen = ScreenTypes.PREVIEW # Default
 cam_screen = cameraScreen.CameraScreen(fb)
-gallery_screen = galleryScreen.GalleryScreen()
+gallery_screen = galleryScreen.GalleryScreen(fb)
 
 try:
     print(f"Starting Render Loop, current screen: {current_screen}")
@@ -53,7 +52,6 @@ try:
             if current_screen == ScreenTypes.PREVIEW:
                 cam_screen.preview_camera()
             elif current_screen == ScreenTypes.GALLERY:
-                print("Switching to camera Gallery Screen")
                 gallery_screen.show_image()
             
 except KeyboardInterrupt:
