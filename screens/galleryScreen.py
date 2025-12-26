@@ -10,6 +10,8 @@ class GalleryScreen:
         # For now we can assume it is working
         self.right_button = Button(24, bounce_time=1)  # small debounce
         self.left_button = Button(23, bounce_time=1)  # small debounce
+        self.right_button.when_pressed = self.on_right_button_pressed
+        self.left_button.when_pressed = self.on_left_button_pressed
         self.gallery_path = mount_usb() / "gallery"
         self.images = []
         self.gallery_lock = False
