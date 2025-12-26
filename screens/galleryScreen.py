@@ -20,23 +20,22 @@ class GalleryScreen:
         for img_file in self.gallery_path.glob("*.jpg"):
             if img_file not in self.images:
                 self.images.append(img_file)
+        self.modulo = len(self.images)
+        self.index = len(self.images) - 1  # Start at the most recent image
 
     def show_gallery(self):
-        modulo = len(self.images)
-        index = len(self.images) - 1  # Start at the most recent image
-        while True:
-            if modulo == 0:
-                print("No images in gallery.")
-                break
+        
+        if self.modulo == 0:
+            print("No images in gallery.")
+            return
 
-            current_image_path = self.images[index % modulo]
-            print(f"Displaying image: {current_image_path}")
-            # fb_bytes = rgb24_to_rgb565(np.ascontiguousarray(fb_frame))
-            # write_to_screen(self.fb, fb_bytes)
+        current_image_path = self.images[self.index % self.modulo]
+        print(f"Displaying image: {current_image_path}")
+        # fb_bytes = rgb24_to_rgb565(np.ascontiguousarray(fb_frame))
+        # write_to_screen(self.fb, fb_bytes)
 
-
-            # Wait for button press to navigate
-            if self.right_button.is_pressed:
-                index += 1
-            elif self.left_button.is_pressed:
-                index -= 1
+        # Wait for button press to navigate
+        if self.right_button.is_pressed:
+            self.index += 1
+        elif self.left_button.is_pressed:
+            self.index -= 1
