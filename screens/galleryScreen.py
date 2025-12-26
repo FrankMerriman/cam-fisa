@@ -4,6 +4,8 @@
 from utils.mountUSB import mount_usb
 from screens.screen import Screen
 from gpiozero import Button
+from PIL import Image
+import numpy as np
 
 class GalleryScreen(Screen):
     def __init__(self, fb):
@@ -75,5 +77,10 @@ class GalleryScreen(Screen):
 
             current_image_path = self.images[self.index % self.modulo]
             print(f"Displaying image: {current_image_path}")
-        # fb_bytes = rgb24_to_rgb565(np.ascontiguousarray(fb_frame))
-        # write_to_screen(self.fb, fb_bytes)
+
+            img = Image.open(current_image_path)
+            img.convert("RGB")
+            img = img.resize((self.fb.width, self.fb.height), Image.BILINEAR)
+            fb_frame = np.asarray(img, dtype=np.uint8)
+            fb_bytes = self.fb.rgb24_to_rgb565(np.ascontiguousarray(fb_frame))
+            self.fb.write_to_screen(fb_bytes)
