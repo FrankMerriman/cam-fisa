@@ -5,13 +5,9 @@ class writeToScreen:
     """Framebuffer manager to handle opening and closing the framebuffer device"""
     def __init__(self, fb_path="/dev/fb0"):
         self.fb_path = fb_path
-        self.fb = None
+        self.fb = open(self.FB_PATH, "r+b")
 
-    def __enter__(self):
-        self.fb = open(self.fb_path, "wb")
-        return self.fb
-
-    def __exit__(self, exc_type, exc_value, traceback):
+    def close(self):
         if self.fb:
             self.fb.close()
 

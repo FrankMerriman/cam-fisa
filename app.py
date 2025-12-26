@@ -50,4 +50,4 @@ try:
 except KeyboardInterrupt:
     print("Exiting...")
 finally:
-    cam_screen.stop_camera()
+    fb.close()
