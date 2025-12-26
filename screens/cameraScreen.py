@@ -64,7 +64,7 @@ class CameraScreen:
         fb_frame = self.letterbox(frame)
         # fb_frame, top_area, bottom_area = self.draw_buttons(fb_frame)
         fb_bytes = self.fb.rgb24_to_rgb565(np.ascontiguousarray(fb_frame))
-        self.fb.write_to_screen(self.fb, fb_bytes)
+        self.fb.write_to_screen(fb_bytes)
         x, y, pressure = self.read_touch()
         if x:
             print(f"Touch at ({x}, {y}) with pressure {pressure}")
