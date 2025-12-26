@@ -6,7 +6,6 @@ import numpy as np
 import cv2
 from PIL import Image, ImageDraw, ImageFont
 from picamera2 import Picamera2
-from utils.writeToScreen import write_to_screen, rgb24_to_rgb565
 from utils.rpiInfo import get_cpu_temp, get_fps, get_gallery_path
 from utils.mountUSB import mount_usb
 from evdev import InputDevice, categorize, ecodes
@@ -21,12 +20,12 @@ class CameraScreen:
     FONT = ImageFont.load_default()
     
 
-    def __init__(self):
+    def __init__(self, fb):
         self.picam2 = Picamera2()
         self.preview_config = self.picam2.create_preview_configuration(main={"size": (640, 480)}) # Needs to be halved again to fit display, this is smallest available
         self.capture_config = self.picam2.create_still_configuration(main={"size": (2592, 1944)})
         self.video_config = self.picam2.create_video_configuration()
-        self.fb = None
+        self.fb = fb
         self.touch = InputDevice('/dev/input/event0')
 
         self.button = Button(26, bounce_time=0.05)  # small debounce
@@ -52,20 +51,20 @@ class CameraScreen:
         self.button_locked = False
 
     def start_camera(self):
-        self.fb = open(self.FB_PATH, "r+b")
+        # self.fb = open(self.FB_PATH, "r+b")
         self.picam2.configure(self.preview_config)
         self.picam2.start()
 
     def stop_camera(self):
-        self.fb.close()
+        # self.fb.close()
         self.picam2.stop()
         
     def preview_camera(self):
         frame = self.picam2.capture_array()
         fb_frame = self.letterbox(frame)
         # fb_frame, top_area, bottom_area = self.draw_buttons(fb_frame)
-        fb_bytes = rgb24_to_rgb565(np.ascontiguousarray(fb_frame))
-        write_to_screen(self.fb, fb_bytes)
+        fb_bytes = self.fb.rgb24_to_rgb565(np.ascontiguousarray(fb_frame))
+        self.fb.write_to_screen(self.fb, fb_bytes)
         x, y, pressure = self.read_touch()
         if x:
             print(f"Touch at ({x}, {y}) with pressure {pressure}")

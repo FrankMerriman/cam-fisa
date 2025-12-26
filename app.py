@@ -1,5 +1,6 @@
 import screens.cameraScreen as cameraScreen
 import screens.galleryScreen as galleryScreen
+import utils.writeToScreen as writeToScreen
 from gpiozero import Button
 import enum
 
@@ -30,8 +31,10 @@ screen_button_locked = False
 screen_button.when_pressed = on_screen_button_pressed
 screen_button.when_released = on_screen_button_released
 
+fb = writeToScreen.writeToScreen() # Framebuffer manager, need to pass to screens
+
 current_screen = ScreenTypes.PREVIEW # Default
-cam_screen = cameraScreen.CameraScreen()
+cam_screen = cameraScreen.CameraScreen(fb)
 # gallery_screen = galleryScreen.GalleryScreen()
 
 try:
