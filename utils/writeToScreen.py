@@ -20,7 +20,7 @@ class writeToScreen:
         self.fb.seek(0)
         self.fb.write(fb_bytes)
 
-    def rgb24_to_rgb565(frame):
+    def rgb24_to_rgb565(self, frame):
         """Convert a (H,W,3) uint8 RGB array to RGB565 bytes"""
         r = (frame[:, :, 0] >> 3).astype(np.uint16)
         g = (frame[:, :, 1] >> 2).astype(np.uint16)
