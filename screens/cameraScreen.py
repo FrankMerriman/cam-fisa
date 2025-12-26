@@ -59,7 +59,7 @@ class CameraScreen(Screen):
         if self.button_locked and not self.button.is_pressed:
             self.on_button_released()
         # If button is pressed and not locked, take photo
-        if not self.button_locked and self.button.is_pressed:
+        if self.button.is_pressed:
             self.on_button_pressed()
         
         frame = self.picam2.capture_array()
