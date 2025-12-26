@@ -50,7 +50,7 @@ class GalleryScreen(Screen):
         self.index = len(self.images) - 1  # Start at the most recent image
 
     def process(self):
-        print("Processing gallery frame")
+        # print("Processing gallery frame")
 
         # If button is released, release the lock
         if self.right_button_lock and not self.right_button.is_pressed:
