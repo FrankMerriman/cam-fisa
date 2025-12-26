@@ -23,7 +23,7 @@ def swap_screen():
     elif current_screen == ScreenTypes.GALLERY:
         current_screen = ScreenTypes.PREVIEW
 
-screen_button = Button(26, bounce_time=0.05)
+screen_button = Button(25, bounce_time=0.05)
 screen_button_locked = False
 
 screen_button.when_pressed = on_screen_button_pressed
