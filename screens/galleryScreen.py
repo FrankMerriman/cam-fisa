@@ -9,23 +9,38 @@ class GalleryScreen(Screen):
     def __init__(self, fb):
         # Once I have a function for it, do a check for USB mount
         # For now we can assume it is working
-        self.right_button = Button(24, bounce_time=1)  # 24
-        self.left_button = Button(23, bounce_time=1)  # 23
+        self.right_button = Button(24, bounce_time=0.05)  # 24
+        self.left_button = Button(23, bounce_time=0.05)  # 23
+        # These locks are activated when button is pressed. They release when button is not pressed.
+        # Prevents triggering an index increment every loop while button is held down (way too fast)
+        self.right_button_lock = False
+        self.left_button_lock = False
         self.gallery_path = mount_usb() / "gallery"
         self.images = []
         self.gallery_lock = False
         self.fb = fb
         self.index = 0
 
+    def release_gallery_lock(self):
+        self.gallery_lock = False
+
     def on_right_button_pressed(self):
         print("Right button pressed")
-        self.gallery_lock = False
+        self.right_button_lock = True
+        self.release_gallery_lock()
         self.index += 1
 
     def on_left_button_pressed(self):
         print("Left button pressed")
-        self.gallery_lock = False
+        self.left_button_lock = True
+        self.release_gallery_lock()
         self.index -= 1
+    
+    def on_right_button_released(self):
+        self.right_button_lock = False
+    
+    def on_left_button_released(self):
+        self.left_button_lock = False
         
     def load_gallery_images(self):
         for img_file in self.gallery_path.glob("*.jpg"):
@@ -36,12 +51,21 @@ class GalleryScreen(Screen):
 
     def process(self):
         print("Processing gallery frame")
-        if self.right_button.is_pressed:
+
+        # If button is released, release the lock
+        if self.right_button_lock and not self.right_button.is_pressed:
+            self.on_right_button_released()
+        if self.left_button_lock and not self.left_button.is_pressed:
+            self.on_left_button_released()
+
+        # If button is pressed and not locked, process the press
+        if not self.right_button_lock and self.right_button.is_pressed:
             self.on_right_button_pressed()
-        elif self.left_button.is_pressed:
+        elif not self.left_button_lock and self.left_button.is_pressed:
             self.on_left_button_pressed()
 
-        
+        # Gallery lock prevents re-processing the same image multiple times
+        # Is released by index increment
         if self.gallery_lock == False:
             self.gallery_lock = True
 
