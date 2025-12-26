@@ -1,9 +1,7 @@
 # This file lays out the functionality of the main camera screen
 # It has a live feed of what the module sees + some light UI elements
 # to use the touch screen to interact with the camera and its quick menu options
-import time
 import numpy as np
-import cv2
 from PIL import Image, ImageDraw, ImageFont
 from picamera2 import Picamera2
 from utils.rpiInfo import get_cpu_temp, get_fps, get_gallery_path
@@ -56,24 +54,13 @@ class CameraScreen(Screen):
             self.on_button_pressed()
         
         frame = self.picam2.capture_array()
-        fb_frame = self.letterbox(frame)
+        fb_frame = self.fb.letterbox(frame)
         # fb_frame, top_area, bottom_area = self.draw_buttons(fb_frame)
         fb_bytes = self.fb.rgb24_to_rgb565(np.ascontiguousarray(fb_frame))
         self.fb.write_to_screen(fb_bytes)
         x, y, pressure = self.read_touch()
         if x:
             print(f"Touch at ({x}, {y}) with pressure {pressure}")
-
-    def letterbox(self, frame):
-        h, w = frame.shape[:2]
-        scale = min(self.fb.width / w, self.fb.height / h)
-        new_w, new_h = int(w * scale), int(h * scale)
-        resized = cv2.resize(frame, (new_w, new_h), interpolation=cv2.INTER_NEAREST)
-        fb_frame = np.zeros((self.fb.height, self.fb.width, 3), dtype=np.uint8)
-        x_offset = (self.fb.width - new_w) // 2
-        y_offset = (self.fb.height - new_h) // 2
-        fb_frame[y_offset:y_offset+new_h, x_offset:x_offset+new_w, :] = resized[:, :, :3]
-        return fb_frame
     
     def draw_buttons(self, frame):
         img = Image.fromarray(frame)
