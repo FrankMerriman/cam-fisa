@@ -11,22 +11,20 @@ class GalleryScreen(Screen):
         # For now we can assume it is working
         self.right_button = Button(24, bounce_time=1)  # 24
         self.left_button = Button(23, bounce_time=1)  # 23
-        self.right_button.when_pressed = self.on_right_button_pressed
-        self.left_button.when_pressed = self.on_left_button_pressed
         self.gallery_path = mount_usb() / "gallery"
         self.images = []
-        # self.gallery_lock = False
+        self.gallery_lock = False
         self.fb = fb
         self.index = 0
 
     def on_right_button_pressed(self):
         print("Right button pressed")
-        # self.gallery_lock = False
+        self.gallery_lock = False
         self.index += 1
 
     def on_left_button_pressed(self):
         print("Left button pressed")
-        # self.gallery_lock = False
+        self.gallery_lock = False
         self.index -= 1
         
     def load_gallery_images(self):
@@ -37,14 +35,25 @@ class GalleryScreen(Screen):
         self.index = len(self.images) - 1  # Start at the most recent image
 
     def process(self):
-        # Gallery lock is meant to stop redrawing of the same image.
-        # Only redraw when the index changes, as lock is released only by button press
-        print("Processing gallery frame")
-        if self.modulo == 0:
-            print("No images in gallery.")
-            return
+        if self.right_button.is_pressed:
+            self.on_right_button_pressed()
+        elif self.left_button.is_pressed:
+            self.on_left_button_pressed()
+        
+        if self.left_button.is_released:
+            pass
+        if self.right_button.is_released:
+            pass
+        
+        if self.gallery_lock == False:
+            self.gallery_lock = True
+            print("Processing gallery frame")
 
-        current_image_path = self.images[self.index % self.modulo]
-        # print(f"Displaying image: {current_image_path}")
+            if self.modulo == 0:
+                print("No images in gallery.")
+                return
+
+            current_image_path = self.images[self.index % self.modulo]
+            print(f"Displaying image: {current_image_path}")
         # fb_bytes = rgb24_to_rgb565(np.ascontiguousarray(fb_frame))
         # write_to_screen(self.fb, fb_bytes)
