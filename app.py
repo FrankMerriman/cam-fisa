@@ -18,6 +18,7 @@ def on_screen_button_released():
     screen_button_locked = False
 
 def swap_screen():
+    global current_screen
     if current_screen == ScreenTypes.PREVIEW:
         current_screen = ScreenTypes.GALLERY
     elif current_screen == ScreenTypes.GALLERY:
