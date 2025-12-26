@@ -4,8 +4,8 @@ import numpy as np
 class writeToScreen:
     """Framebuffer manager to handle opening and closing the framebuffer device"""
     def __init__(self, fb_path="/dev/fb0"):
-        self.fb_path = fb_path
-        self.fb = open(self.FB_PATH, "r+b")
+        # self.fb_path = fb_path
+        self.fb = open(fb_path, "r+b")
 
     def close(self):
         if self.fb:
