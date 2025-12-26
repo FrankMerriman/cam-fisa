@@ -14,8 +14,7 @@ from gpiozero import Button
 from screens.screen import Screen
 
 class CameraScreen(Screen):
-    FB_PATH = "/dev/fb0"
-    FB_W, FB_H = 240, 320
+    fb.width, fb.height = 240, 320
     BUTTON_HEIGHT = 50
     FONT = ImageFont.load_default()
     
@@ -73,24 +72,24 @@ class CameraScreen(Screen):
 
     def letterbox(self, frame):
         h, w = frame.shape[:2]
-        scale = min(self.FB_W / w, self.FB_H / h)
+        scale = min(self.fb.width / w, self.fb.height / h)
         new_w, new_h = int(w * scale), int(h * scale)
         resized = cv2.resize(frame, (new_w, new_h), interpolation=cv2.INTER_NEAREST)
-        fb_frame = np.zeros((self.FB_H, self.FB_W, 3), dtype=np.uint8)
-        x_offset = (self.FB_W - new_w) // 2
-        y_offset = (self.FB_H - new_h) // 2
+        fb_frame = np.zeros((self.fb.height, self.fb.width, 3), dtype=np.uint8)
+        x_offset = (self.fb.width - new_w) // 2
+        y_offset = (self.fb.height - new_h) // 2
         fb_frame[y_offset:y_offset+new_h, x_offset:x_offset+new_w, :] = resized[:, :, :3]
         return fb_frame
     
     def draw_buttons(self, frame):
         img = Image.fromarray(frame)
         draw = ImageDraw.Draw(img)
-        top_button_area = (0, 0, self.FB_W // 2, self.BUTTON_HEIGHT)
-        bottom_button_area = (self.FB_W // 2, self.FB_H - self.BUTTON_HEIGHT, self.FB_W, self.FB_H)
+        top_button_area = (0, 0, self.fb.width // 2, self.BUTTON_HEIGHT)
+        bottom_button_area = (self.fb.width // 2, self.fb.height - self.BUTTON_HEIGHT, self.fb.width, self.fb.height)
         draw.rectangle(top_button_area, fill=(0, 0, 255))
         draw.text((5, 5), "Top", fill=(255, 255, 255))
         draw.rectangle(bottom_button_area, fill=(255, 0, 0))
-        draw.text((self.FB_W//2 + 5, self.FB_H - 45), "Bottom", fill=(255, 255, 255))
+        draw.text((self.fb.width//2 + 5, self.fb.height - 45), "Bottom", fill=(255, 255, 255))
         return np.array(img), top_button_area, bottom_button_area
     
     def read_touch(self):

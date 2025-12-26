@@ -4,8 +4,9 @@ import numpy as np
 class FBManager:
     """Framebuffer manager to handle opening and closing the framebuffer device"""
     def __init__(self, fb_path="/dev/fb0"):
-        # self.fb_path = fb_path
         self.fb = open(fb_path, "r+b")
+        self.width = 240
+        self.height = 320
 
     def close(self):
         if self.fb:
