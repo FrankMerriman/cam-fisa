@@ -31,9 +31,10 @@ screen_button.when_released = on_screen_button_released
 
 current_screen = ScreenTypes.PREVIEW # Default
 cam_screen = cameraScreen.CameraScreen()
-gallery_screen = galleryScreen.GalleryScreen()
+# gallery_screen = galleryScreen.GalleryScreen()
 
 try:
+    print("Starting Render Loop")
     while True:
             if current_screen == ScreenTypes.PREVIEW:
                 cam_screen.preview_camera()

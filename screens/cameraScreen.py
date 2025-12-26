@@ -40,6 +40,8 @@ class CameraScreen:
             self.gallery_path.mkdir(exist_ok=True)
         else:
             raise RuntimeError("No USB drive found. Cannot create gallery.")
+        
+        print("Initialized Camera Screen")
 
     def on_button_pressed(self):
         if not self.button_locked:
