@@ -2,7 +2,6 @@
 # It shows previously capture images @ 320x240 with the ability to scroll left to right
 # You can also zoom in and out of images. Zooming out far enough displays a grid of multiple images.
 from utils.mountUSB import mount_usb
-from utils.writeToScreen import write_to_screen, rgb24_to_rgb565
 from gpiozero import Button
 
 class GalleryScreen:
