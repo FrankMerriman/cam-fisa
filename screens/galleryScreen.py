@@ -36,9 +36,9 @@ class GalleryScreen(Screen):
 
     def process(self):
         print("Processing gallery frame")
-        if self.right_button.is_pressed():
+        if self.right_button.is_pressed:
             self.on_right_button_pressed()
-        elif self.left_button.is_pressed():
+        elif self.left_button.is_pressed:
             self.on_left_button_pressed()
 
         
