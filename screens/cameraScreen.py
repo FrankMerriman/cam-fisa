@@ -26,12 +26,9 @@ class CameraScreen(Screen):
         self.video_config = self.picam2.create_video_configuration()
         self.fb = fb
         self.touch = InputDevice('/dev/input/event0')
-
         self.button = Button(26, bounce_time=0.05)  # small debounce
         self.button_locked = False  # lock flag
         
-        self.button.when_pressed = self.on_button_pressed
-        self.button.when_released = self.on_button_released
         self.usb_path = mount_usb()
         if self.usb_path:
             self.gallery_path = self.usb_path / "gallery"
@@ -58,7 +55,13 @@ class CameraScreen(Screen):
         self.picam2.stop()
         
     def process(self):
-        # print("Processing camera frame")
+        # If shutter is released, release the lock on further photos
+        if self.button_locked and not self.button.is_pressed:
+            self.on_button_released()
+        # If button is pressed and not locked, take photo
+        if not self.button_locked and self.button.is_pressed:
+            self.on_button_pressed()
+        
         frame = self.picam2.capture_array()
         fb_frame = self.letterbox(frame)
         # fb_frame, top_area, bottom_area = self.draw_buttons(fb_frame)
