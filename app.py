@@ -12,6 +12,8 @@ def on_screen_button_pressed():
     global screen_button_locked
     if not screen_button_locked:
         screen_button_locked = True
+        print("Screen button pressed, swapping screens")
+        print(f"screen_button_locked: {screen_button_locked}")
         swap_screen()
 
 def on_screen_button_released():
