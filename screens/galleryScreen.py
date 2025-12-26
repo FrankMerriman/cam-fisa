@@ -35,15 +35,15 @@ class GalleryScreen(Screen):
         self.index = len(self.images) - 1  # Start at the most recent image
 
     def process(self):
-        if self.right_button.is_pressed:
+        print("Processing gallery frame")
+        if self.right_button.is_pressed():
             self.on_right_button_pressed()
-        elif self.left_button.is_pressed:
+        elif self.left_button.is_pressed():
             self.on_left_button_pressed()
 
         
         if self.gallery_lock == False:
             self.gallery_lock = True
-            print("Processing gallery frame")
 
             if self.modulo == 0:
                 print("No images in gallery.")
