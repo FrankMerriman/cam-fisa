@@ -17,6 +17,7 @@ class GalleryScreen(Screen):
         self.images = []
         # self.gallery_lock = False
         self.fb = fb
+        self.index = 0
 
     def on_right_button_pressed(self):
         print("Right button pressed")
