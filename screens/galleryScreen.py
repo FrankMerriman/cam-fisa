@@ -39,11 +39,7 @@ class GalleryScreen(Screen):
             self.on_right_button_pressed()
         elif self.left_button.is_pressed:
             self.on_left_button_pressed()
-        
-        if self.left_button.is_released:
-            pass
-        if self.right_button.is_released:
-            pass
+
         
         if self.gallery_lock == False:
             self.gallery_lock = True
