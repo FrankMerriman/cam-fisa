@@ -81,7 +81,7 @@ class GalleryScreen(Screen):
             img = Image.open(current_image_path)
             img.convert("RGB")
             fb_frame = np.asarray(img, dtype=np.uint8)
-            # fb_frame = self.fb.letterbox(fb_frame)
+            fb_frame = self.fb.letterbox(fb_frame)
             fb_bytes = self.fb.rgb24_to_rgb565(np.ascontiguousarray(fb_frame))
             self.fb.write_to_screen(fb_bytes)
 
