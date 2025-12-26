@@ -14,7 +14,6 @@ from gpiozero import Button
 from screens.screen import Screen
 
 class CameraScreen(Screen):
-    fb.width, fb.height = 240, 320
     BUTTON_HEIGHT = 50
     FONT = ImageFont.load_default()
     
