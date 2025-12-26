@@ -34,7 +34,8 @@ cam_screen = cameraScreen.CameraScreen()
 # gallery_screen = galleryScreen.GalleryScreen()
 
 try:
-    print("Starting Render Loop")
+    print(f"Starting Render Loop, current screen: {current_screen}")
+    cam_screen.start_camera()
     while True:
             if current_screen == ScreenTypes.PREVIEW:
                 cam_screen.preview_camera()
