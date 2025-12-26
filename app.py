@@ -1,8 +1,11 @@
 import screens.cameraScreen as cameraScreen
 import screens.galleryScreen as galleryScreen
-from screens.screenManager import ScreenTypes, ScreenManager
 from gpiozero import Button
+import enum
 
+class ScreenTypes(enum.Enum):
+    PREVIEW = 1
+    GALLERY = 2
 
 def on_screen_button_pressed():
     global screen_button_locked
