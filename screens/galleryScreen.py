@@ -13,6 +13,6 @@ class GalleryScreen:
         else:
             raise RuntimeError("No USB drive found. Cannot create gallery.")
         
-        self.right_button = Button(26, bounce_time=0.05)  # small debounce
-        self.left_button = Button(26, bounce_time=0.05)  # small debounce
+        self.right_button = Button(24, bounce_time=0.05)  # small debounce
+        self.left_button = Button(23, bounce_time=0.05)  # small debounce
         
