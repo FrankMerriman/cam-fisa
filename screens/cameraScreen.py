@@ -51,6 +51,7 @@ class CameraScreen(Screen):
 
     def start_camera(self):
         # self.fb = open(self.FB_PATH, "r+b")
+        print("starting camera preview")
         self.picam2.configure(self.preview_config)
         self.picam2.start()
 
