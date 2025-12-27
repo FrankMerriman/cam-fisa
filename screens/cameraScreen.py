@@ -104,12 +104,18 @@ class CameraScreen(Screen):
         """Draws UI elements and returns the new frame"""
         # Convert to PIL for adding UI elements
         img = Image.fromarray(frame)
-        draw = ImageDraw.Draw(img)
+        # Create a transparent layer for text
+        text_layer = Image.new("RGBA", img.size, (0, 0, 0, 0))
+
+        draw = ImageDraw.Draw(text_layer)
 
         fps = get_fps()
         cpu_temp = get_cpu_temp()
         draw.text((5, 5), f"FPS: {fps:.1f}", font=self.FONT, fill=(255, 0, 0))
         draw.text((5, 25), f"CPU: {cpu_temp:.1f}C", font=self.FONT, fill=(255, 0, 0))
+
+        rotated_text = text_layer.rotate(90, expand=True)
+        img.paste(rotated_text, (0, 0), rotated_text)
 
         # Convert back to numpy array for writing to screen
         return np.array(img)
