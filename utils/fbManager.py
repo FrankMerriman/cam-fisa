@@ -4,7 +4,7 @@ import cv2
 
 class FBManager:
     """Framebuffer manager to handle opening and closing the framebuffer device"""
-    def __init__(self, fb_path="/dev/fb0"):
+    def __init__(self, fb_path="/dev/fb1"):
         self.fb = open(fb_path, "r+b")
         self.width = 240
         self.height = 320
