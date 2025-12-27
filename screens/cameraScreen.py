@@ -2,7 +2,7 @@
 # It has a live feed of what the module sees + some light UI elements
 # to use the touch screen to interact with the camera and its quick menu options
 import numpy as np
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageOps
 from picamera2 import Picamera2
 from utils.rpiInfo import get_cpu_temp, get_fps
 from utils.mountUSB import mount_usb
@@ -124,6 +124,7 @@ class CameraScreen(Screen):
         # Account for sensor rotation
         image = Image.open(path)
         image = image.transpose(Image.ROTATE_90)
+        image = self.apply_filter_to_image(image)
         image.save(path)
     
     def load_screen(self):
@@ -146,3 +147,19 @@ class CameraScreen(Screen):
             return np.stack([gray] * 3, axis=2)
 
         return frame
+
+    def apply_filter_to_image(self, img):
+        if self.current_filter == FilterType.NONE:
+            return img
+
+        elif self.current_filter == FilterType.DEBUG:
+            # DEBUG is UI-only → do NOT affect saved image
+            return img
+
+        elif self.current_filter == FilterType.INVERT:
+            return ImageOps.invert(img)
+
+        elif self.current_filter == FilterType.GRAYSCALE:
+            return img.convert("L").convert("RGB")
+
+        return img
