@@ -10,7 +10,7 @@ from PIL import Image, ImageDraw, ImageFont
 fb = FBManager()
 
 # Write welcome message
-img = fb.create_blank_image()  # Assuming FBManager has a helper; else, use Image.new
+img = Image.new('RGB', (fb.width, fb.height), color=(0, 0, 0))
 draw = ImageDraw.Draw(img)
 
 # Load default font
