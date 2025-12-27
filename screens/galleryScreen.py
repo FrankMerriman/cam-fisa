@@ -78,12 +78,15 @@ class GalleryScreen(Screen):
             current_image_path = self.images[self.index % self.modulo]
             print(f"Displaying image: {current_image_path}")
 
-            img = Image.open(current_image_path)
-            img.convert("RGB")
-            fb_frame = np.asarray(img, dtype=np.uint8)
-            fb_frame = self.fb.letterbox(fb_frame)
-            fb_bytes = self.fb.rgb24_to_rgb565(np.ascontiguousarray(fb_frame))
-            self.fb.write_to_screen(fb_bytes)
+            try:
+                img = Image.open(current_image_path)
+                img.convert("RGB")
+                fb_frame = np.asarray(img, dtype=np.uint8)
+                fb_frame = self.fb.letterbox(fb_frame)
+                fb_bytes = self.fb.rgb24_to_rgb565(np.ascontiguousarray(fb_frame))
+                self.fb.write_to_screen(fb_bytes)
+            except Exception as e:
+                print(f"Error loading image {current_image_path}: {e}")
 
     # Makes sure vars that are needed when screen is swapped to are available
     def load_screen(self):
