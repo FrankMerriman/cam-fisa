@@ -8,6 +8,14 @@ from utils.rpiInfo import get_cpu_temp, get_fps
 from utils.mountUSB import mount_usb
 from gpiozero import Button
 from screens.screen import Screen
+from enum import Enum
+
+class FilterType(Enum):
+    NONE = 0
+    DEBUG = 1
+    INVERT = 2
+    GRAYSCALE = 3
+
 
 class CameraScreen(Screen):
     FONT = ImageFont.load_default()
@@ -28,6 +36,10 @@ class CameraScreen(Screen):
         self.debug_button = Button(4, bounce_time=0.05)  # GPIO4 for debug - prints temp + FPS
         self.debug_button_locked = False
         self.debug = False
+
+        self.filter_types = list(FilterType)
+        self.filter_index = 0
+        self.current_filter = self.filter_types[self.filter_index]
         
         self.usb_path = mount_usb()
         if self.usb_path:
@@ -50,7 +62,11 @@ class CameraScreen(Screen):
     def on_debug_button_pressed(self):
         if not self.debug_button_locked:
             self.debug_button_locked = True
-            self.debug = not self.debug # Swap state back and forth on each press
+
+            self.filter_index = (self.filter_index + 1) % len(self.filter_types) #Loops through filters
+            self.current_filter = self.filter_types[self.filter_index]
+
+            print(f"Filter changed to: {self.current_filter.name}")
     
     def on_debug_button_released(self):
         self.debug_button_locked = False
@@ -75,8 +91,7 @@ class CameraScreen(Screen):
         
         frame = self.picam2.capture_array()
         fb_frame = self.fb.letterbox(frame)
-        if self.debug:
-            fb_frame = self.draw_ui(fb_frame)
+        fb_frame = self.apply_filter(fb_frame)
         fb_bytes = self.fb.rgb24_to_rgb565(np.ascontiguousarray(fb_frame))
         self.fb.write_to_screen(fb_bytes)
 
@@ -115,3 +130,19 @@ class CameraScreen(Screen):
         print("Loading camera screen")
         self.picam2.configure(self.preview_config)
         self.picam2.start()
+    
+    def apply_filter(self, frame):
+        if self.current_filter == FilterType.NONE:
+            return frame
+
+        elif self.current_filter == FilterType.DEBUG:
+            return self.draw_ui(frame)
+
+        elif self.current_filter == FilterType.INVERT:
+            return 255 - frame
+
+        elif self.current_filter == FilterType.GRAYSCALE:
+            gray = frame.mean(axis=2).astype(np.uint8)
+            return np.stack([gray] * 3, axis=2)
+
+        return frame
