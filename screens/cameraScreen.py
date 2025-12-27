@@ -9,6 +9,7 @@ from utils.mountUSB import mount_usb
 from gpiozero import Button
 from screens.screen import Screen
 from enum import Enum
+import cv2
 
 class FilterType(Enum):
     NONE = 0
@@ -114,7 +115,7 @@ class CameraScreen(Screen):
         draw.text((5, 5), f"FPS: {fps:.1f}", font=self.FONT, fill=(255, 0, 0))
         draw.text((5, 25), f"CPU: {cpu_temp:.1f}C", font=self.FONT, fill=(255, 0, 0))
 
-        rotated_text = text_layer.rotate(90, expand=True)
+        rotated_text = text_layer.rotate(270, expand=True)
         img.paste(rotated_text, (0, 0), rotated_text)
 
         # Convert back to numpy array for writing to screen
@@ -135,7 +136,27 @@ class CameraScreen(Screen):
         # Account for sensor rotation
         image = Image.open(path)
         image = image.transpose(Image.ROTATE_90)
-        image = self.apply_filter_to_image(image)
+        if self.current_filter in (FilterType.POSTERIZE, FilterType.SCANLINES):
+            # Convert to numpy
+            arr = np.array(image)
+            h, w = arr.shape[:2]
+
+            # Determine scale for pixelation
+            scale = 0.1 if self.current_filter == FilterType.POSTERIZE else 0.5
+            # Downscale
+            small = cv2.resize(arr, (int(w*scale), int(h*scale)), interpolation=cv2.INTER_NEAREST)
+            # Upscale
+            arr = cv2.resize(small, (w, h), interpolation=cv2.INTER_NEAREST)
+
+            # Extra effect for scanlines
+            if self.current_filter == FilterType.SCANLINES:
+                arr[::2] = (arr[::2] * 0.6).astype(np.uint8)
+
+            # Convert back to PIL
+            image = Image.fromarray(arr)
+        else:
+            # Apply normal filter if any
+            image = self.apply_filter_to_image(image)
         image.save(path)
     
     def load_screen(self):
