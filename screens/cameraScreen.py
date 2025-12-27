@@ -14,7 +14,12 @@ class CameraScreen(Screen):
     
     def __init__(self, fb):
         self.picam2 = Picamera2()
-        self.preview_config = self.picam2.create_preview_configuration(main={"size": (640, 480)}) # Needs to be halved again to fit display, this is smallest available
+        self.preview_config = self.picam2.create_preview_configuration(
+            main={"size": (640, 480)}, # Has to be halved to fit display
+            controls={
+                "FrameDurationLimits": (40000, 40000)  # cap at 25 FPS, might help temps
+            }
+        )
         self.capture_config = self.picam2.create_still_configuration(main={"size": (2592, 1944)})
         self.fb = fb
         self.button = Button(26, bounce_time=0.05)  # small debounce
