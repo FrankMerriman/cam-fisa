@@ -188,38 +188,6 @@ class CameraScreen(Screen):
         return frame
 
     def apply_filter_to_image(self, img: Image.Image) -> Image.Image:
-        f = self.current_filter
-
-        if f in (FilterType.NONE, FilterType.DEBUG):
-            return img
-
-        elif f == FilterType.INVERT:
-            return ImageOps.invert(img)
-
-        elif f == FilterType.GRAYSCALE:
-            return img.convert("L").convert("RGB")
-
-        elif f == FilterType.SEPIA:
-            gray = img.convert("L")
-            return ImageOps.colorize(gray, "#704214", "#C0A080")
-
-        elif f == FilterType.SOLARIZE:
-            return ImageOps.solarize(img, threshold=128)
-
-        elif f == FilterType.POSTERIZE:
-            return ImageOps.posterize(img, bits=3)
-
-        elif f == FilterType.NOISE:
-            arr = np.array(img)
-            noise = np.random.randint(0, 20, arr.shape, dtype=np.uint8)
-            return Image.fromarray(np.clip(arr + noise, 0, 255))
-
-        elif f == FilterType.MIRROR:
-            return img.transpose(Image.FLIP_LEFT_RIGHT)
-
-        elif f == FilterType.SCANLINES:
-            arr = np.array(img)
-            arr[::2] = (arr[::2] * 0.6).astype(np.uint8)
-            return Image.fromarray(arr)
-
-        return img
+        arr = np.array(img)
+        filtered = self.apply_filter_np(arr)
+        return Image.fromarray(filtered)
