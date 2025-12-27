@@ -6,7 +6,6 @@ from PIL import Image, ImageDraw, ImageFont
 from picamera2 import Picamera2
 from utils.rpiInfo import get_cpu_temp, get_fps
 from utils.mountUSB import mount_usb
-import select
 from gpiozero import Button
 from screens.screen import Screen
 
@@ -75,9 +74,6 @@ class CameraScreen(Screen):
             fb_frame = self.draw_ui(fb_frame)
         fb_bytes = self.fb.rgb24_to_rgb565(np.ascontiguousarray(fb_frame))
         self.fb.write_to_screen(fb_bytes)
-        x, y, pressure = self.read_touch()
-        if x:
-            print(f"Touch at ({x}, {y}) with pressure {pressure}")
 
     def draw_ui(self, frame):
         """Draws UI elements and returns the new frame"""
