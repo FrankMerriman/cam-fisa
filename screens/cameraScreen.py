@@ -19,9 +19,7 @@ class FilterType(Enum):
     SEPIA = 4
     SOLARIZE = 5
     POSTERIZE = 6
-    SCANLINES = 7
-    NOISE = 8
-    MIRROR = 9
+    NOISE = 7
 
 class CameraScreen(Screen):
     FONT = ImageFont.load_default()
@@ -132,18 +130,13 @@ class CameraScreen(Screen):
         # Account for sensor rotation
         image = Image.open(path)
         image = image.transpose(Image.ROTATE_90)
-        if self.current_filter in (FilterType.POSTERIZE, FilterType.SCANLINES):
-            # Convert to numpy
+        if self.current_filter == FilterType.POSTERIZE:
             arr = np.array(image)
             h, w = arr.shape[:2]
-
-             # Determine scale for pixelation
-            scale = 0.1 if self.current_filter == FilterType.POSTERIZE else 0.5
-
+            scale = 0.1
             # Downscale → Upscale
             small = cv2.resize(arr, (int(w*scale), int(h*scale)), interpolation=cv2.INTER_NEAREST)
             arr = cv2.resize(small, (w, h), interpolation=cv2.INTER_NEAREST)
-
             # Convert back to PIL
             image = Image.fromarray(arr)
 
@@ -185,17 +178,9 @@ class CameraScreen(Screen):
         elif f == FilterType.POSTERIZE:
             return (frame // 64) * 64
 
-        elif f == FilterType.SCANLINES:
-            frame = frame.copy()
-            frame[::2] = (frame[::2] * 0.6).astype(np.uint8)
-            return frame
-
         elif f == FilterType.NOISE:
             noise = np.random.randint(0, 20, frame.shape, dtype=np.uint8)
             return np.clip(frame + noise, 0, 255)
-
-        elif f == FilterType.MIRROR:
-            return frame[:, ::-1]
 
         return frame
 
