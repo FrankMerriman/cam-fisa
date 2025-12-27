@@ -13,8 +13,8 @@ fb = FBManager()
 img = Image.new('RGB', (fb.width, fb.height), color=(0, 0, 0))
 draw = ImageDraw.Draw(img)
 
-# Load default font
-font = ImageFont.load_default()
+
+font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", size=12)
 
 # Define text lines
 lines = [
