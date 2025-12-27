@@ -106,17 +106,13 @@ class CameraScreen(Screen):
         # Convert to PIL for adding UI elements
         img = Image.fromarray(frame)
         # Create a transparent layer for text
-        text_layer = Image.new("RGBA", img.size, (0, 0, 0, 0))
 
-        draw = ImageDraw.Draw(text_layer)
+        draw = ImageDraw.Draw(img)
 
         fps = get_fps()
         cpu_temp = get_cpu_temp()
         draw.text((5, 5), f"FPS: {fps:.1f}", font=self.FONT, fill=(255, 0, 0))
         draw.text((5, 25), f"CPU: {cpu_temp:.1f}C", font=self.FONT, fill=(255, 0, 0))
-
-        rotated_text = text_layer.rotate(270, expand=True)
-        img.paste(rotated_text, (0, 0), rotated_text)
 
         # Convert back to numpy array for writing to screen
         return np.array(img)
@@ -141,22 +137,17 @@ class CameraScreen(Screen):
             arr = np.array(image)
             h, w = arr.shape[:2]
 
-            # Determine scale for pixelation
+             # Determine scale for pixelation
             scale = 0.1 if self.current_filter == FilterType.POSTERIZE else 0.5
-            # Downscale
-            small = cv2.resize(arr, (int(w*scale), int(h*scale)), interpolation=cv2.INTER_NEAREST)
-            # Upscale
-            arr = cv2.resize(small, (w, h), interpolation=cv2.INTER_NEAREST)
 
-            # Extra effect for scanlines
-            if self.current_filter == FilterType.SCANLINES:
-                arr[::2] = (arr[::2] * 0.6).astype(np.uint8)
+            # Downscale → Upscale
+            small = cv2.resize(arr, (int(w*scale), int(h*scale)), interpolation=cv2.INTER_NEAREST)
+            arr = cv2.resize(small, (w, h), interpolation=cv2.INTER_NEAREST)
 
             # Convert back to PIL
             image = Image.fromarray(arr)
-        else:
-            # Apply normal filter if any
-            image = self.apply_filter_to_image(image)
+
+        image = self.apply_filter_to_image(image)
         image.save(path)
     
     def load_screen(self):
@@ -210,5 +201,5 @@ class CameraScreen(Screen):
 
     def apply_filter_to_image(self, img: Image.Image) -> Image.Image:
         arr = np.array(img)
-        filtered = self.apply_filter_np(arr)
+        filtered = self.apply_filter(arr)
         return Image.fromarray(filtered)
