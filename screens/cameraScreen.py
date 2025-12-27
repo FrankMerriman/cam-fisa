@@ -15,7 +15,12 @@ class FilterType(Enum):
     DEBUG = 1
     INVERT = 2
     GRAYSCALE = 3
-
+    SEPIA = 4
+    SOLARIZE = 5
+    POSTERIZE = 6
+    SCANLINES = 7
+    NOISE = 8
+    MIRROR = 9
 
 class CameraScreen(Screen):
     FONT = ImageFont.load_default()
@@ -132,34 +137,83 @@ class CameraScreen(Screen):
         self.picam2.configure(self.preview_config)
         self.picam2.start()
     
-    def apply_filter(self, frame):
-        if self.current_filter == FilterType.NONE:
+    def apply_filter(self, frame: np.ndarray) -> np.ndarray:
+        f = self.current_filter
+
+        if f == FilterType.NONE:
             return frame
 
-        elif self.current_filter == FilterType.DEBUG:
+        elif f == FilterType.DEBUG:
             return self.draw_ui(frame)
 
-        elif self.current_filter == FilterType.INVERT:
+        elif f == FilterType.INVERT:
             return 255 - frame
 
-        elif self.current_filter == FilterType.GRAYSCALE:
+        elif f == FilterType.GRAYSCALE:
             gray = frame.mean(axis=2).astype(np.uint8)
             return np.stack([gray] * 3, axis=2)
 
+        elif f == FilterType.SEPIA:
+            sepia = frame.astype(np.float32)
+            r, g, b = sepia[..., 0], sepia[..., 1], sepia[..., 2]
+            sepia[..., 0] = 0.393*r + 0.769*g + 0.189*b
+            sepia[..., 1] = 0.349*r + 0.686*g + 0.168*b
+            sepia[..., 2] = 0.272*r + 0.534*g + 0.131*b
+            return np.clip(sepia, 0, 255).astype(np.uint8)
+
+        elif f == FilterType.SOLARIZE:
+            return np.where(frame > 128, 255 - frame, frame)
+
+        elif f == FilterType.POSTERIZE:
+            return (frame // 64) * 64
+
+        elif f == FilterType.SCANLINES:
+            frame = frame.copy()
+            frame[::2] = (frame[::2] * 0.6).astype(np.uint8)
+            return frame
+
+        elif f == FilterType.NOISE:
+            noise = np.random.randint(0, 20, frame.shape, dtype=np.uint8)
+            return np.clip(frame + noise, 0, 255)
+
+        elif f == FilterType.MIRROR:
+            return frame[:, ::-1]
+
         return frame
 
-    def apply_filter_to_image(self, img):
-        if self.current_filter == FilterType.NONE:
+    def apply_filter_to_image(self, img: Image.Image) -> Image.Image:
+        f = self.current_filter
+
+        if f in (FilterType.NONE, FilterType.DEBUG):
             return img
 
-        elif self.current_filter == FilterType.DEBUG:
-            # DEBUG is UI-only → do NOT affect saved image
-            return img
-
-        elif self.current_filter == FilterType.INVERT:
+        elif f == FilterType.INVERT:
             return ImageOps.invert(img)
 
-        elif self.current_filter == FilterType.GRAYSCALE:
+        elif f == FilterType.GRAYSCALE:
             return img.convert("L").convert("RGB")
+
+        elif f == FilterType.SEPIA:
+            gray = img.convert("L")
+            return ImageOps.colorize(gray, "#704214", "#C0A080")
+
+        elif f == FilterType.SOLARIZE:
+            return ImageOps.solarize(img, threshold=128)
+
+        elif f == FilterType.POSTERIZE:
+            return ImageOps.posterize(img, bits=3)
+
+        elif f == FilterType.NOISE:
+            arr = np.array(img)
+            noise = np.random.randint(0, 20, arr.shape, dtype=np.uint8)
+            return Image.fromarray(np.clip(arr + noise, 0, 255))
+
+        elif f == FilterType.MIRROR:
+            return img.transpose(Image.FLIP_LEFT_RIGHT)
+
+        elif f == FilterType.SCANLINES:
+            arr = np.array(img)
+            arr[::2] = (arr[::2] * 0.6).astype(np.uint8)
+            return Image.fromarray(arr)
 
         return img
