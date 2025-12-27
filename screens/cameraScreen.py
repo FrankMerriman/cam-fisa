@@ -4,26 +4,26 @@
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 from picamera2 import Picamera2
-from utils.rpiInfo import get_cpu_temp, get_fps, get_gallery_path
+from utils.rpiInfo import get_cpu_temp, get_fps
 from utils.mountUSB import mount_usb
-from evdev import InputDevice, categorize, ecodes
 import select
 from gpiozero import Button
 from screens.screen import Screen
 
 class CameraScreen(Screen):
-    BUTTON_HEIGHT = 50
     FONT = ImageFont.load_default()
     
     def __init__(self, fb):
         self.picam2 = Picamera2()
         self.preview_config = self.picam2.create_preview_configuration(main={"size": (640, 480)}) # Needs to be halved again to fit display, this is smallest available
         self.capture_config = self.picam2.create_still_configuration(main={"size": (2592, 1944)})
-        self.video_config = self.picam2.create_video_configuration()
         self.fb = fb
-        self.touch = InputDevice('/dev/input/event0')
         self.button = Button(26, bounce_time=0.05)  # small debounce
         self.button_locked = False  # lock flag
+
+        self.debug_button = Button(4, bounce_time=0.05)  # GPIO4 for debug - prints temp + FPS
+        self.debug_button_locked = False
+        self.debug = False
         
         self.usb_path = mount_usb()
         if self.usb_path:
@@ -42,6 +42,15 @@ class CameraScreen(Screen):
     def on_button_released(self):
         self.button_locked = False
 
+
+    def on_debug_button_pressed(self):
+        if not self.debug_button_locked:
+            self.debug_button_locked = True
+            self.debug = not self.debug # Swap state back and forth on each press
+    
+    def on_debug_button_released(self):
+        self.debug_button_locked = False
+
     def stop_camera(self):
         self.picam2.stop()
         
@@ -53,59 +62,39 @@ class CameraScreen(Screen):
         if self.button.is_pressed:
             self.on_button_pressed()
         
+        # If debug button is released, release the lock
+        if self.debug_button_locked and not self.debug_button.is_pressed:
+            self.on_debug_button_released()
+        # If debug button is pressed and not locked, toggle debug
+        if self.debug_button.is_pressed:
+            self.on_debug_button_pressed()
+        
         frame = self.picam2.capture_array()
         fb_frame = self.fb.letterbox(frame)
-        # fb_frame, top_area, bottom_area = self.draw_buttons(fb_frame)
+        if self.debug:
+            fb_frame = self.draw_ui(fb_frame)
         fb_bytes = self.fb.rgb24_to_rgb565(np.ascontiguousarray(fb_frame))
         self.fb.write_to_screen(fb_bytes)
         x, y, pressure = self.read_touch()
         if x:
             print(f"Touch at ({x}, {y}) with pressure {pressure}")
-    
-    def draw_buttons(self, frame):
+
+    def draw_ui(self, frame):
+        """Draws UI elements and returns the new frame"""
+        # Convert to PIL for adding UI elements
         img = Image.fromarray(frame)
         draw = ImageDraw.Draw(img)
-        top_button_area = (0, 0, self.fb.width // 2, self.BUTTON_HEIGHT)
-        bottom_button_area = (self.fb.width // 2, self.fb.height - self.BUTTON_HEIGHT, self.fb.width, self.fb.height)
-        draw.rectangle(top_button_area, fill=(0, 0, 255))
-        draw.text((5, 5), "Top", fill=(255, 255, 255))
-        draw.rectangle(bottom_button_area, fill=(255, 0, 0))
-        draw.text((self.fb.width//2 + 5, self.fb.height - 45), "Bottom", fill=(255, 255, 255))
-        return np.array(img), top_button_area, bottom_button_area
-    
-    def read_touch(self):
-        x = y = pressure = None
-        r, _, _ = select.select([self.touch], [], [], 0)
-        if r:
-            for event in self.touch.read():
-                if event.type == ecodes.EV_ABS:
-                    if event.code == ecodes.ABS_X:
-                        x = event.value
-                    elif event.code == ecodes.ABS_Y:
-                        y = event.value
-                    elif event.code == ecodes.ABS_PRESSURE:
-                        pressure = event.value
-                elif event.type == ecodes.EV_SYN:  # SYN_REPORT → end of this sample
-                    if x is not None and y is not None and pressure is not None:
-                        return x, y, pressure
-        return None, None, None
 
-    # def draw_ui(self, frame):
-    #     """Draws UI elements and returns the new frame"""
-    #     # Convert to PIL for adding UI elements
-    #     img = Image.fromarray(frame)
-    #     draw = ImageDraw.Draw(img)
+        fps = get_fps()
+        cpu_temp = get_cpu_temp()
+        draw.text((5, 5), f"FPS: {fps:.1f}", font=self.FONT, fill=(255, 0, 0))
+        draw.text((5, 25), f"CPU: {cpu_temp:.1f}C", font=self.FONT, fill=(255, 0, 0))
 
-    #     fps = get_fps()
-    #     cpu_temp = get_cpu_temp()
-    #     draw.text((5, 5), f"FPS: {fps:.1f}", font=self.FONT, fill=(255, 0, 0))
-    #     draw.text((5, 25), f"CPU: {cpu_temp:.1f}C", font=self.FONT, fill=(255, 0, 0))
-
-    #     # Convert back to numpy array for writing to screen
-    #     return np.array(img)
+        # Convert back to numpy array for writing to screen
+        return np.array(img)
 
     def capture_image(self):
-        # Need to add a cache to start _1 from to stop counting from starte very time
+        # Need to add a cache to start _1 from to stop counting from start very time
         file_name = "CAMFISA_0.jpg"
         path = self.gallery_path / file_name
         counter = 1
